@@ -77,7 +77,7 @@ export const activar = async (id: number): Promise<PreguntaVF> => {
 
 //Creamos un objeto para exportar todos los métodos juntos y que se pueda usar en el componente preguntaService.getAll()
 
-const preguntaService = {
+const preguntaVFService = {
   getAll,
   getById,
   create,
@@ -86,4 +86,4 @@ const preguntaService = {
   activar,
 };
 
-export default preguntaService;
+export default preguntaVFService;
