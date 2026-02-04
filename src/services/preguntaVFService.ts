@@ -1,95 +1,89 @@
-import axios from 'axios';
+import axios, { type AxiosInstance } from "axios";
 
-// URL base de la API REST para preguntas de Verdadero/Falso
-const API_URL = 'http://localhost:8080/api/preguntas/vf';
+const API_BASE = "http://localhost:8080";
+const API_PATH = "/api/preguntas/vf";
 
-/**
- * Obtiene una lista paginada de preguntas de Verdadero/Falso
- * @param page - Número de página (0-indexed)
- * @param size - Cantidad de registros por página
- * @returns Datos paginados de preguntas
- */
-export const getPreguntas = async (page: number, size: number) => {
-  try {
-    const response = await axios.get(`${API_URL}?page=${page}&size=${size}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error al obtener preguntas:', error);
-    throw error;
-  }
+const api: AxiosInstance = axios.create({
+  baseURL: API_BASE + API_PATH,
+  headers: { "Content-Type": "application/json" },
+});
+
+export interface PreguntaVF {
+  id: number | null;
+  enunciado: string;
+  tematica?: string | null;
+  fechaCreacion?: string;
+  activa?: boolean;
+  respuestaCorrecta: boolean;
+  explicacion?: string | null;
+  tipoPregunta: "VERDADERO_FALSO";
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  pageable?: any;
+  totalElements?: number;
+  totalPages?: number;
+  size?: number;
+  number?: number;
+}
+
+// GET paginado
+export const getAll = async (
+  page = 0, //Valores por defecto
+  size = 10,
+): Promise<PagedResponse<PreguntaVF>> => {
+  const resp = await api.get("/", { params: { page, size } });
+  return resp.data;
 };
 
-/**
- * Obtiene una pregunta específica por su ID
- * @param id - ID de la pregunta
- * @returns Datos de la pregunta
- */
-export const getPreguntaById = async (id: number) => {
-  try {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error al obtener la pregunta con ID ${id}:`, error);
-    throw error;
-  }
+// GET por ID
+export const getById = async (id: number): Promise<PreguntaVF> => {
+  const resp = await api.get(`/${id}`);
+  return resp.data;
 };
 
-/**
- * Crea una nueva pregunta de Verdadero/Falso
- * @param pregunta - Objeto con los datos de la nueva pregunta
- * @returns Datos de la pregunta creada
- */
-export const createPregunta = async (pregunta: any) => {
-  try {
-    const response = await axios.post(API_URL, pregunta);
-    return response.data;
-  } catch (error) {
-    console.error('Error al crear la pregunta:', error);
-    throw error;
-  }
+// POST crear
+export const create = async (
+  pregunta: Omit<PreguntaVF, "id" | "fechaCreacion" | "tipoPregunta"> & {
+    tipoPregunta?: "VERDADERO_FALSO";
+  },
+): Promise<PreguntaVF> => {
+  const body = { ...pregunta, tipoPregunta: "VERDADERO_FALSO" };
+  const resp = await api.post("/", body);
+  return resp.data;
 };
 
-/**
- * Actualiza una pregunta existente
- * @param id - ID de la pregunta a actualizar
- * @param pregunta - Objeto con los datos actualizados
- * @returns Datos de la pregunta actualizada
- */
-export const updatePregunta = async (id: number, pregunta: any) => {
-  try {
-    const response = await axios.put(`${API_URL}/${id}`, pregunta);
-    return response.data;
-  } catch (error) {
-    console.error(`Error al actualizar la pregunta con ID ${id}:`, error);
-    throw error;
-  }
+// PUT actualizar
+export const update = async (
+  id: number,
+  pregunta: Partial<PreguntaVF>,
+): Promise<PreguntaVF> => {
+  const resp = await api.put(`/${id}`, pregunta);
+  return resp.data;
 };
 
-/**
- * Desactiva (elimina lógicamente) una pregunta
- * @param id - ID de la pregunta a desactivar
- * @returns Respuesta del servidor
- */
-export const desactivarPregunta = async (id: number): Promise<void> => {
-  try {
-    await axios.delete(`${API_URL}/${id}`);
-  } catch (error) {
-    console.error(`Error al desactivar la pregunta con ID ${id}:`, error);
-    throw error;
-  }
+// DELETE lógico (desactivar)
+export const desactivar = async (id: number): Promise<PreguntaVF> => {
+  const resp = await api.delete(`/${id}`);
+  return resp.data;
 };
 
-/**
- * Reactiva una pregunta desactivada
- * @param id - ID de la pregunta a reactivar
- * @returns Datos de la pregunta reactivada
- */
-export const activarPregunta = async (id: number) => {
-  try {
-    const response = await axios.put(`${API_URL}/activar/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error al activar la pregunta con ID ${id}:`, error);
-    throw error;
-  }
+// PUT activar
+export const activar = async (id: number): Promise<PreguntaVF> => {
+  const resp = await api.put(`/activar/${id}`);
+  return resp.data;
 };
+
+//Creamos un objeto para exportar todos los métodos juntos y que se pueda usar en el componente preguntaService.getAll()
+
+const preguntaService = {
+  getAll,
+  getById,
+  create,
+  update,
+  desactivar,
+  activar,
+};
+
+export default preguntaService;

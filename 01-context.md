@@ -83,5 +83,5 @@ interface PreguntaVF {
 - El backend valida los campos
 - Si el body es incorrecto → 400
 - Si no existe el ID → 404
-- Más adelante se incluirá Bootstrap, por ahora no
+- No usar CDN para Bootstrap
 - Axios será el cliente HTTP
