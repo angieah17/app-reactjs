@@ -33,7 +33,7 @@ export const getAll = async (
   page = 0, //Valores por defecto
   size = 10,
 ): Promise<PagedResponse<PreguntaVF>> => {
-  const resp = await api.get("/", { params: { page, size } });
+  const resp = await api.get("", { params: { page, size } });
   return resp.data;
 };
 
