@@ -63,7 +63,7 @@ export const create = async (
   },
 ): Promise<IPreguntaVF> => {
   const body = { ...pregunta, tipoPregunta: "VERDADERO_FALSO" }; //Al crear una nueva pregunta, el tipo de pregunta se establece automáticamente como "VERDADERO_FALSO", independientemente de si el cliente lo incluye o no en la solicitud. Esto garantiza que todas las preguntas creadas a través de este método sean del tipo correcto.
-  const resp = await api.post("/", body);
+  const resp = await api.post("", body);
   return resp.data;
 };
 
