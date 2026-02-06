@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import preguntaVFService, { type IPreguntaVF } from "../services/preguntaVFService";
-
+import preguntaVFService, {
+  type IPreguntaVF,
+} from "../services/preguntaVFService";
 
 const PreguntaVF = () => {
   const [preguntas, setPreguntas] = useState<IPreguntaVF[]>([]);
@@ -18,6 +19,22 @@ const PreguntaVF = () => {
     }
   };
 
+  const cambiarEstado = async (p: IPreguntaVF) => {
+    if (!p.id) return;
+
+    try {
+      if (p.activa) {
+        await preguntaVFService.desactivar(p.id);
+      } else {
+        await preguntaVFService.activar(p.id);
+      }
+
+      cargarPreguntas(); // refrescamos la lista
+    } catch (error) {
+      console.error("Error cambiando estado", error);
+    }
+  };
+
   //Se ejecuta una sola vez, justo después de que el componente aparece en pantalla
   useEffect(() => {
     cargarPreguntas();
@@ -27,9 +44,7 @@ const PreguntaVF = () => {
     <div>
       <h2>Preguntas Verdadero / Falso</h2>
 
-      <button onClick={cargarPreguntas}>
-        Recargar preguntas 
-      </button>
+      <button onClick={cargarPreguntas}>Recargar preguntas</button>
 
       {cargando && <p>Cargando...</p>}
 
@@ -39,6 +54,12 @@ const PreguntaVF = () => {
             <strong>{p.enunciado}</strong>
             <br />
             Respuesta correcta: {p.respuestaCorrecta ? "Verdadero" : "Falso"}
+            <br />
+            Estado: {p.activa ? "Activa" : "Inactiva"}
+            <br />
+            <button onClick={() => cambiarEstado(p)}>
+              {p.activa ? "Desactivar" : "Activar"}
+            </button>
           </li>
         ))}
       </ul>
