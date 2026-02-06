@@ -18,17 +18,17 @@ const PreguntaVF = () => {
     }
   };
 
-  // De momento NO cargamos automáticamente
-  // useEffect(() => {
-  //   cargarPreguntas();
-  // }, []);
+  //Se ejecuta una sola vez, justo después de que el componente aparece en pantalla
+  useEffect(() => {
+    cargarPreguntas();
+  }, []);
 
   return (
     <div>
       <h2>Preguntas Verdadero / Falso</h2>
 
       <button onClick={cargarPreguntas}>
-        Cargar preguntas
+        Recargar preguntas 
       </button>
 
       {cargando && <p>Cargando...</p>}
