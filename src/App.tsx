@@ -1,11 +1,13 @@
-import TestPreguntaVF from './components/TestPreguntaVF';
+import PreguntaVF from "./components/PreguntaVF"
+
+
 
 function App() {
   
 
   return (
     <>
-<TestPreguntaVF/>
+    <PreguntaVF/>
     </>
   )
 }

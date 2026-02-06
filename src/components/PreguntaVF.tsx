@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import type { PreguntaVF } from "../services/preguntaVFService";
-import preguntaVFService from "../services/preguntaVFService";
+import preguntaVFService, { type IPreguntaVF } from "../services/preguntaVFService";
 
 
 const PreguntaVF = () => {
-  const [preguntas, setPreguntas] = useState<PreguntaVF[]>([]);
+  const [preguntas, setPreguntas] = useState<IPreguntaVF[]>([]);
   const [cargando, setCargando] = useState(false);
 
   const cargarPreguntas = async () => {
