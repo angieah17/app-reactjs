@@ -18,6 +18,10 @@ const PreguntaVF = () => {
   // Estado para modo edición
   const [editingId, setEditingId] = useState<number | null>(null);
 
+  // Estado para ver detalles
+  const [detallesPregunta, setDetallesPregunta] = useState<IPreguntaVF | null>(null);
+  const [cargandoDetalles, setCargandoDetalles] = useState(false);
+
   const cargarPreguntas = async () => {
     setCargando(true);
     try {
@@ -49,6 +53,9 @@ const PreguntaVF = () => {
   const iniciarEdicion = (p: IPreguntaVF) => {
     if (!p.id) return;
 
+    // Cerrar modal de detalles si está abierto
+    setDetallesPregunta(null);
+
     // Cargar datos de la pregunta en el formulario
     setEditingId(p.id);
     setEnunciado(p.enunciado);
@@ -72,6 +79,25 @@ const PreguntaVF = () => {
     setActiva(true);
     setTematica("");
     setExplicacion("");
+  };
+
+  const verDetalles = async (id: number | null) => {
+    if (!id) return;
+
+    setCargandoDetalles(true);
+    try {
+      const pregunta = await preguntaVFService.getById(id);
+      setDetallesPregunta(pregunta);
+    } catch (error) {
+      console.error("Error cargando detalles de la pregunta", error);
+      alert("Error al cargar los detalles de la pregunta");
+    } finally {
+      setCargandoDetalles(false);
+    }
+  };
+
+  const cerrarDetalles = () => {
+    setDetallesPregunta(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -258,11 +284,121 @@ const PreguntaVF = () => {
             >
               Editar
             </button>
+            <button 
+              onClick={() => verDetalles(p.id)}
+              style={{ marginLeft: "10px" }}
+            >
+              Ver Detalles
+            </button>
           </li>
         ))}
       </ul>
+
+      {/* Modal de detalles */}
+      {detallesPregunta && (
+        <div style={modalStyles.overlay} onClick={cerrarDetalles}>
+          <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={modalStyles.header}>
+              <h2>Detalles de la Pregunta</h2>
+              <button 
+                onClick={cerrarDetalles}
+                style={modalStyles.closeButton}
+                type="button"
+              >
+                ✕
+              </button>
+            </div>
+
+            {cargandoDetalles ? (
+              <p style={{ padding: "15px" }}>Cargando...</p>
+            ) : (
+              <div style={modalStyles.content}>
+                <div style={{ marginBottom: "15px" }}>
+                  <strong>Enunciado:</strong>
+                  <p>{detallesPregunta.enunciado}</p>
+                </div>
+
+                <div style={{ marginBottom: "15px" }}>
+                  <strong>Respuesta Correcta:</strong>
+                  <p style={{ color: "#0066cc", fontWeight: "bold" }}>
+                    {detallesPregunta.respuestaCorrecta ? "Verdadero" : "Falso"}
+                  </p>
+                </div>
+
+                {detallesPregunta.explicacion ? (
+                  <div style={{ marginBottom: "15px", backgroundColor: "#f0f8ff", padding: "10px", borderRadius: "5px" }}>
+                    <strong style={{ color: "#0066cc" }}>Explicación:</strong>
+                    <p>{detallesPregunta.explicacion}</p>
+                  </div>
+                ) : (
+                  <div style={{ marginBottom: "15px", backgroundColor: "#f5f5f5", padding: "10px", borderRadius: "5px" }}>
+                    <em>Sin explicación disponible</em>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div style={modalStyles.footer}>
+              <button 
+                onClick={cerrarDetalles}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+};
+
+// Estilos para el modal
+const modalStyles = {
+  overlay: {
+    position: "fixed" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    maxWidth: "600px",
+    width: "90%",
+    maxHeight: "80vh",
+    overflow: "auto",
+  },
+  header: {
+    display: "flex" as const,
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "15px",
+    borderBottom: "1px solid #ddd",
+  },
+  closeButton: {
+    background: "none",
+    border: "none",
+    fontSize: "24px",
+    cursor: "pointer",
+    color: "#999",
+  },
+  content: {
+    padding: "15px",
+  },
+  footer: {
+    display: "flex" as const,
+    justifyContent: "flex-end",
+    gap: "10px",
+    padding: "15px",
+    borderTop: "1px solid #ddd",
+  },
 };
 
 export default PreguntaVF;
