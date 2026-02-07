@@ -20,6 +20,7 @@ const PreguntaUnica = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   // Estado para ver detalles
+  const [detallesId, setDetallesId] = useState<number | null>(null);
   const [detallesPregunta, setDetallesPregunta] = useState<IPreguntaUnica | null>(null);
   const [cargandoDetalles, setCargandoDetalles] = useState(false);
 
@@ -54,13 +55,14 @@ const PreguntaUnica = () => {
   const iniciarEdicion = (p: IPreguntaUnica) => {
     if (!p.id) return;
 
+    setDetallesId(null);
     setDetallesPregunta(null);
 
     setEditingId(p.id);
     setEnunciado(p.enunciado);
     setOpciones([...p.opciones]);
     setRespuestaCorrecta(p.respuestaCorrecta);
-    setActiva(p.activa ?? true);
+    // No cargamos activa al editar, ya que se maneja con los botones
     setTematica(p.tematica || "");
     setExplicacion(p.explicacion || "");
 
@@ -81,45 +83,14 @@ const PreguntaUnica = () => {
     setExplicacion("");
   };
 
-  const verDetalles = async (id: number | null) => {
+  const verDetalles = (id: number | null) => {
     if (!id) return;
-
-    setCargandoDetalles(true);
-    try {
-      const pregunta = await preguntaUnicaService.getById(id);
-      setDetallesPregunta(pregunta);
-    } catch (error) {
-      console.error("Error cargando detalles de la pregunta", error);
-      alert("Error al cargar los detalles de la pregunta");
-    } finally {
-      setCargandoDetalles(false);
-    }
+    setDetallesId(id);
   };
 
   const cerrarDetalles = () => {
+    setDetallesId(null);
     setDetallesPregunta(null);
-  };
-
-  const agregarOpcion = () => {
-    setOpciones([...opciones, ""]);
-  };
-
-  const eliminarOpcion = (index: number) => {
-    if (opciones.length <= 3) {
-      alert("Debe haber al menos 3 opciones");
-      return;
-    }
-    const nuevasOpciones = opciones.filter((_, i) => i !== index);
-    setOpciones(nuevasOpciones);
-    
-    // Si se elimina la opción correcta o una anterior, ajustar el índice
-    if (respuestaCorrecta >= nuevasOpciones.length) {
-      setRespuestaCorrecta(nuevasOpciones.length - 1);
-    } else if (index < respuestaCorrecta) {
-      setRespuestaCorrecta(respuestaCorrecta - 1);
-    } else if (index === respuestaCorrecta) {
-      setRespuestaCorrecta(0);
-    }
   };
 
   const actualizarOpcion = (index: number, valor: string) => {
@@ -137,13 +108,14 @@ const PreguntaUnica = () => {
       return;
     }
 
-    const opcionesFiltradas = opciones.filter((op) => op.trim() !== "");
-    if (opcionesFiltradas.length < 3) {
-      alert("Debe haber al menos 3 opciones válidas");
+    // Validar que todas las opciones estén completas
+    if (opciones.some((op) => !op.trim())) {
+      alert("Todas las opciones deben estar completadas");
       return;
     }
 
-    if (respuestaCorrecta >= opcionesFiltradas.length) {
+    // Validar que la respuesta correcta sea válida
+    if (respuestaCorrecta < 0 || respuestaCorrecta >= opciones.length) {
       alert("El índice de respuesta correcta no es válido");
       return;
     }
@@ -152,12 +124,14 @@ const PreguntaUnica = () => {
     try {
       const preguntaData = {
         enunciado: enunciado.trim(),
-        opciones: opcionesFiltradas,
+        opciones: opciones.map((op) => op.trim()),
         respuestaCorrecta,
-        activa,
+        ...(editingId === null && { activa }), // Solo incluir activa al crear
         tematica: tematica.trim() || null,
         explicacion: explicacion.trim() || null,
       };
+
+      console.log("Enviando datos:", preguntaData);
 
       if (editingId !== null) {
         await preguntaUnicaService.update(editingId, preguntaData);
@@ -175,6 +149,31 @@ const PreguntaUnica = () => {
       setCreando(false);
     }
   };
+
+  // Efecto para cargar detalles cuando cambia detallesId
+  useEffect(() => {
+    if (detallesId === null) {
+      setDetallesPregunta(null);
+      return;
+    }
+
+    const cargarDetalles = async () => {
+      setCargandoDetalles(true);
+      try {
+        const pregunta = await preguntaUnicaService.getById(detallesId);
+        console.log("Datos recibidos del backend:", pregunta);
+        setDetallesPregunta(pregunta);
+      } catch (error) {
+        console.error("Error cargando detalles", error);
+        alert("Error al cargar los detalles");
+        setDetallesId(null);
+      } finally {
+        setCargandoDetalles(false);
+      }
+    };
+
+    cargarDetalles();
+  }, [detallesId]);
 
   useEffect(() => {
     cargarPreguntas();
@@ -210,34 +209,23 @@ const PreguntaUnica = () => {
           </div>
 
           <div style={{ marginBottom: "10px" }}>
-            <strong>Opciones * (mínimo 3)</strong>
+            <strong>Opciones * (Edita todas las opciones)</strong>
             {opciones.map((opcion, index) => (
-              <div key={index} style={{ marginTop: "5px", display: "flex", alignItems: "center" }}>
+              <div key={index} style={{ marginTop: "5px" }}>
+                <label htmlFor={`opcion-${index}`}>
+                  Opción {index + 1}
+                </label>
+                <br />
                 <input
+                  id={`opcion-${index}`}
                   type="text"
                   value={opcion}
                   onChange={(e) => actualizarOpcion(index, e.target.value)}
-                  placeholder={`Opción ${index + 1}`}
-                  style={{ flex: 1, marginRight: "10px" }}
+                  placeholder={`Escribe la opción ${index + 1}`}
+                  style={{ width: "100%" }}
                 />
-                {opciones.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => eliminarOpcion(index)}
-                    style={{ padding: "5px 10px" }}
-                  >
-                    Eliminar
-                  </button>
-                )}
               </div>
             ))}
-            <button
-              type="button"
-              onClick={agregarOpcion}
-              style={{ marginTop: "10px" }}
-            >
-              + Agregar Opción
-            </button>
           </div>
 
           <div style={{ marginBottom: "10px" }}>
@@ -251,21 +239,23 @@ const PreguntaUnica = () => {
                   checked={respuestaCorrecta === index}
                   onChange={() => setRespuestaCorrecta(index)}
                 />
-                Opción {index + 1} {opcion.trim() && `(${opcion.substring(0, 30)}${opcion.length > 30 ? '...' : ''})`}
+                Opción {index + 1}
               </label>
             ))}
           </div>
 
-          <div style={{ marginBottom: "10px" }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={activa}
-                onChange={(e) => setActiva(e.target.checked)}
-              />
-              {editingId !== null ? "Activa" : "Activa al crear"}
-            </label>
-          </div>
+          {editingId === null && (
+            <div style={{ marginBottom: "10px" }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={activa}
+                  onChange={(e) => setActiva(e.target.checked)}
+                />
+                Activa al crear
+              </label>
+            </div>
+          )}
 
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="tematica">Temática (opcional)</label>
@@ -355,11 +345,11 @@ const PreguntaUnica = () => {
       </ul>
 
       {/* Modal de detalles */}
-      {detallesPregunta && (
+      {detallesId !== null && detallesPregunta && (
         <div style={modalStyles.overlay} onClick={cerrarDetalles}>
           <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={modalStyles.header}>
-              <h2>Detalles de la Pregunta</h2>
+              <h2>Detalles de la Pregunta (ID: {detallesPregunta.id})</h2>
               <button 
                 onClick={cerrarDetalles}
                 style={modalStyles.closeButton}
@@ -370,7 +360,9 @@ const PreguntaUnica = () => {
             </div>
 
             {cargandoDetalles ? (
-              <p style={{ padding: "15px" }}>Cargando...</p>
+              <div style={modalStyles.content}>
+                <p>Cargando...</p>
+              </div>
             ) : (
               <div style={modalStyles.content}>
                 <div style={{ marginBottom: "15px" }}>
@@ -380,20 +372,23 @@ const PreguntaUnica = () => {
 
                 <div style={{ marginBottom: "15px" }}>
                   <strong>Opciones:</strong>
-                  <ul>
-                    {detallesPregunta.opciones.map((opcion, index) => (
+                  <ol>
+                    {Array.isArray(detallesPregunta.opciones) && detallesPregunta.opciones.map((opcion, index) => (
                       <li 
-                        key={index}
+                        key={`${detallesPregunta.id}-opt-${index}`}
                         style={{
                           color: index === detallesPregunta.respuestaCorrecta ? "#0066cc" : "inherit",
                           fontWeight: index === detallesPregunta.respuestaCorrecta ? "bold" : "normal",
+                          backgroundColor: index === detallesPregunta.respuestaCorrecta ? "#f0f8ff" : "transparent",
+                          padding: "5px",
+                          marginBottom: "5px"
                         }}
                       >
                         {opcion}
-                        {index === detallesPregunta.respuestaCorrecta && " ✓ (Correcta)"}
+                        {index === detallesPregunta.respuestaCorrecta && " ✓"}
                       </li>
                     ))}
-                  </ul>
+                  </ol>
                 </div>
 
                 {detallesPregunta.explicacion ? (
@@ -410,9 +405,7 @@ const PreguntaUnica = () => {
             )}
 
             <div style={modalStyles.footer}>
-              <button 
-                onClick={cerrarDetalles}
-              >
+              <button onClick={cerrarDetalles}>
                 Cerrar
               </button>
             </div>
