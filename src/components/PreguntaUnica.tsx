@@ -63,7 +63,7 @@ const PreguntaUnica = () => {
     setOpciones([...p.opciones]);
     setRespuestaCorrecta(p.respuestaCorrecta);
     // No cargamos activa al editar, ya que se maneja con los botones
-    setTematica(p.tematica || "");
+    setTematica(p.tematica);
     setExplicacion(p.explicacion || "");
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -120,6 +120,12 @@ const PreguntaUnica = () => {
       return;
     }
 
+    // Validar que la temática no esté vacía
+    if (!tematica.trim()) {
+      alert("La temática es obligatoria");
+      return;
+    }
+
     setCreando(true);
     try {
       const preguntaData = {
@@ -127,7 +133,7 @@ const PreguntaUnica = () => {
         opciones: opciones.map((op) => op.trim()),
         respuestaCorrecta,
         ...(editingId === null && { activa }), // Solo incluir activa al crear
-        tematica: tematica.trim() || null,
+        tematica: tematica.trim(),
         explicacion: explicacion.trim() || null,
       };
 
@@ -258,7 +264,9 @@ const PreguntaUnica = () => {
           )}
 
           <div style={{ marginBottom: "10px" }}>
-            <label htmlFor="tematica">Temática (opcional)</label>
+            <label htmlFor="tematica">
+              <strong>Temática *</strong>
+            </label>
             <br />
             <input
               type="text"
@@ -267,6 +275,8 @@ const PreguntaUnica = () => {
               onChange={(e) => setTematica(e.target.value)}
               placeholder="Ej: Programación, Historia, etc."
               style={{ width: "100%" }}
+              required
+              maxLength={100}
             />
           </div>
 

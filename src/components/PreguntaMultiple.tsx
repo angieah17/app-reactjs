@@ -62,7 +62,7 @@ const PreguntaMultiple = () => {
     setEnunciado(p.enunciado);
     setOpciones([...p.opciones]);
     setRespuestasCorrectas([...p.respuestasCorrectas]);
-    setTematica(p.tematica || "");
+    setTematica(p.tematica);
     setExplicacion(p.explicacion || "");
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -133,6 +133,12 @@ const PreguntaMultiple = () => {
       return;
     }
 
+    // Validar que la temática no esté vacía
+    if (!tematica.trim()) {
+      alert("La temática es obligatoria");
+      return;
+    }
+
     setCreando(true);
     try {
       const preguntaData = {
@@ -140,7 +146,7 @@ const PreguntaMultiple = () => {
         opciones: opciones.map((op) => op.trim()),
         respuestasCorrectas,
         ...(editingId === null && { activa }), // Solo incluir activa al crear
-        tematica: tematica.trim() || null,
+        tematica: tematica.trim(),
         explicacion: explicacion.trim() || null,
       };
 
@@ -270,7 +276,9 @@ const PreguntaMultiple = () => {
           )}
 
           <div style={{ marginBottom: "10px" }}>
-            <label htmlFor="tematica">Temática (opcional)</label>
+            <label htmlFor="tematica">
+              <strong>Temática *</strong>
+            </label>
             <br />
             <input
               type="text"
@@ -279,6 +287,8 @@ const PreguntaMultiple = () => {
               onChange={(e) => setTematica(e.target.value)}
               placeholder="Ej: Programación, Historia, etc."
               style={{ width: "100%" }}
+              required
+              maxLength={100}
             />
           </div>
 
