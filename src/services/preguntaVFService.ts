@@ -11,7 +11,7 @@ const api: AxiosInstance = axios.create({ //con este método se puede pasar un o
 export interface IPreguntaVF {
   id: number | null;
   enunciado: string;
-  tematica?: string | null;
+  tematica: string; // max 100 caracteres, obligatorio
   fechaCreacion?: string; //al utilizar ? se indica que esta propiedad es opcional, es decir, puede estar presente o no en el objeto
   activa?: boolean;
   respuestaCorrecta: boolean;

@@ -11,7 +11,7 @@ const api: AxiosInstance = axios.create({ //con este método se puede pasar un o
 export interface IPreguntaMultiple {
   id: number | null;
   enunciado: string; // max 500 caracteres, obligatorio
-  tematica?: string | null; // max 100 caracteres, opcional
+  tematica: string; // max 100 caracteres, obligatorio
   fechaCreacion?: string; //al utilizar ? se indica que esta propiedad es opcional, es decir, puede estar presente o no en el objeto. ISO 8601 format
   activa?: boolean; // true por defecto
   opciones: string[]; // Array de opciones, mínimo 3, cada opción max 500 caracteres

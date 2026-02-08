@@ -11,7 +11,7 @@ const api: AxiosInstance = axios.create({
 export interface IPreguntaUnica {
   id: number | null;
   enunciado: string;
-  tematica?: string | null;
+  tematica: string; // max 100 caracteres, obligatorio
   fechaCreacion?: string;
   activa?: boolean;
   opciones: string[];
