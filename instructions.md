@@ -187,17 +187,25 @@ export interface PreguntaMultiple extends PreguntaBase {
 
 🎨 Estructura Recomendada
 src/
- ├── api/
- ├── auth/
- ├── components/
- ├── features/
- │    ├── admin/
- │    ├── test/
- │    └── preguntas/
- ├── hooks/
- ├── pages/
- ├── router/
- └── types/
+├── api/                 # ❄️ Comunicación con backend
+│   ├── client.ts       # Configuración de Axios
+│   ├── auth.ts         # Llamadas de autenticación
+│   └── tests.ts        # Llamadas de tests
+├── assets/             # 🖼️ Imágenes, fuentes, etc.
+├── components/         # 🧩 Componentes reutilizables
+│   ├── common/         # Botones, inputs, modales
+│   └── layout/         # Header, Footer, Sidebar
+├── hooks/              # 🪝 Lógica reutilizable con React Hooks
+│   └── useAuth.ts     # Hook de autenticación
+├── pages/              # 📄 Vistas completas
+│   ├── Login.tsx
+│   ├── Dashboard.tsx
+│   └── Test.tsx
+├── types/              # 📝 Definiciones TypeScript
+│   └── index.ts       # Interfaces compartidas
+├── utils/             # 🔧 Utilidades
+│   └── format.ts      # Formateadores
+└── App.tsx            # 🏠 Componente raíz
 
 ⚙️ Reglas Importantes
 
