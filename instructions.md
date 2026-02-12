@@ -8,6 +8,7 @@
 - **Frontend**: React + Vite
 - **Base de Datos**: MySQL 8.0 (puerto 3307)
 - **Autenticación**: Spring Security con HTTP Basic Authentication
+- **Autenticación**: Uso de Axios
 
 ### Backend Ya Implementado
 ```java
