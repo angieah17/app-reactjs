@@ -8,13 +8,13 @@
 - **Frontend**: React + Vite
 - **Base de Datos**: MySQL 8.0 (puerto 3307)
 - **Autenticación**: Spring Security con HTTP Basic Authentication
-- **Autenticación**: Uso de Axios
+- **Autenticación**: Uso de A
 
 ### Backend Ya Implementado
 ```java
 // Endpoint de autenticación
 POST /auth/register - Registro de nuevos usuarios
-GET /api/users/me - Obtener usuario actual autenticado
+GET /auth/me - Obtener usuario actual autenticado
 
 // Sistema de Roles
 - ADMIN: Acceso completo (CRUD preguntas, ver todos los tests)
@@ -158,7 +158,7 @@ headers: { 'Content-Type': 'application/json' }
 // Login
 async login(username, password) {
   // 1. Codificar credenciales
-  // 2. Hacer GET /api/users/me con Basic Auth
+  // 2. Hacer GET /auth/me con Basic Auth
   // 3. Si exitoso: guardar datos y retornar user
   // 4. Si falla: lanzar error
 }
@@ -170,7 +170,7 @@ async register(username, password) {
 
 // Obtener usuario actual
 async getCurrentUser() {
-  // GET /api/users/me (usa credenciales guardadas)
+  // GET /auth/me(usa credenciales guardadas)
 }
 
 // Logout
