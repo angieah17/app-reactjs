@@ -1,0 +1,90 @@
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+
+function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLoginSuccess }) {
+	const { login } = useAuth()
+
+	const [username, setUsername] = useState('')
+	const [password, setPassword] = useState('')
+	const [error, setError] = useState('')
+	const [isSubmitting, setIsSubmitting] = useState(false)
+
+	const handleSubmit = async (event) => {
+		event.preventDefault()
+		setError('')
+
+		const normalizedUsername = username.trim()
+		const normalizedPassword = password.trim()
+
+		if (!normalizedUsername || !normalizedPassword) {
+			setError('Username y password son obligatorios.')
+			return
+		}
+
+		setIsSubmitting(true)
+
+		try {
+			await login(normalizedUsername, normalizedPassword)
+
+			if (typeof onLoginSuccess === 'function') {
+				onLoginSuccess()
+			} else {
+				window.location.assign(redirectTo)
+			}
+		} catch (submitError) {
+			setError(submitError?.message || 'Usuario o contraseña incorrectos.')
+		} finally {
+			setIsSubmitting(false)
+		}
+	}
+
+	return (
+		<section>
+			<h1>Iniciar Sesión</h1>
+
+			<form onSubmit={handleSubmit} noValidate>
+				<div>
+					<label htmlFor="username">Username</label>
+					<input
+						id="username"
+						name="username"
+						type="text"
+						autoComplete="username"
+						value={username}
+						onChange={(event) => setUsername(event.target.value)}
+						required
+					/>
+				</div>
+
+				<div>
+					<label htmlFor="password">Password</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						autoComplete="current-password"
+						value={password}
+						onChange={(event) => setPassword(event.target.value)}
+						required
+					/>
+				</div>
+
+				{error && (
+					<div role="alert" aria-live="polite">
+						{error}
+					</div>
+				)}
+
+				<button type="submit" disabled={isSubmitting}>
+					{isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+				</button>
+			</form>
+
+			<p>
+				¿No tienes cuenta? <a href={registerPath}>Regístrate</a>
+			</p>
+		</section>
+	)
+}
+
+export default LoginPage
