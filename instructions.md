@@ -1,285 +1,576 @@
-🎯 Contexto del Proyecto
-
-Este frontend forma parte de una aplicación completa de gestión de preguntas y tests evaluables.
-
-🔧 Backend ya implementado
-
-Spring Boot 4.0.1 + Java 21
-
-MySQL 8
-
-Arquitectura REST en capas
-
-Autenticación con Spring Security (HTTP Basic)
-
-Roles: ADMIN y USER
-
-CORS habilitado para: http://localhost:5173
-
-Base URL backend: http://localhost:8080
-
-🏗️ Stack del Frontend
-
-React + TypeScript
-
-Vite
-
-Axios
-
-React Router
-
-Context API para autenticación
-
-Arquitectura modular por features
-
-🔐 Autenticación
-Endpoint
-POST /auth/register
-
-
-Autenticación mediante HTTP Basic.
-
-Requisitos:
-
-Crear contexto AuthContext
-
-Guardar credenciales en memoria (NO localStorage en versión básica)
-
-Crear helper para incluir Authorization header automáticamente:
-
-Authorization: Basic base64(username:password)
-
-
-Redirigir según rol:
-
-ADMIN → Panel administración
-
-USER → Generación de test
-
-📚 Funcionalidades a Implementar
-1️⃣ MODO USER
-🎓 Generar Test
-Endpoint
-POST /api/tests/generar
-
-Filtros posibles:
-
-temática
-
-tipo (VERDADERO_FALSO, UNICA, MULTIPLE)
-
-límite de preguntas
-
-Requisitos UI:
-
-Formulario con filtros
-
-Mostrar preguntas dinámicamente
-
-Renderizado condicional según tipo:
-
-VERDADERO_FALSO → radio true/false
-
-UNICA → radio opciones
-
-MULTIPLE → checkbox opciones
-
-📝 Enviar Respuestas
-POST /api/tests/corregir
-
-
-Debe:
-
-Mostrar puntuación
-
-Mostrar respuestas correctas
-
-Guardar resultado
-
-📊 Historial de Resultados
-GET /api/tests/resultados
-
-
-Mostrar:
-
-Fecha
-
-Puntuación
-
-Número de preguntas
-
-2️⃣ MODO ADMIN
-📋 Gestión de Preguntas
-
-Endpoint base:
-
-/api/admin/preguntas
-
-Funcionalidades:
-
-Listado paginado
-
-Filtros combinables:
-
-temática
-
-tipo
-
-estado (activa/inactiva)
-
-texto en enunciado
-
-Ordenación
-
-Activar / desactivar pregunta (soft delete)
-
-➕ CRUD por Tipo
-
-Endpoints:
-
-/api/preguntas/vf
-/api/preguntas/unica
-/api/preguntas/multiple
-
-
-Cada tipo tiene:
-
-Crear
-
-Editar
-
-Eliminar lógico
-
-Ver detalle
-
-🧠 Modelos TypeScript
-
-Copilot debe generar interfaces basadas en backend:
-
-export interface PreguntaBase {
-  id: number
-  enunciado: string
-  tematica: string
-  activa: boolean
-  tipoPregunta: 'VEDADERO_FALSO' | 'UNICA' | 'MULTIPLE'
-}
-
-
-Extensiones:
-
-export interface PreguntaVF extends PreguntaBase {
-  respuestaCorrecta: boolean
-}
-
-export interface Opcion {
-  id?: number
-  texto: string
-  correcta: boolean
-}
-
-export interface PreguntaUnica extends PreguntaBase {
-  opciones: Opcion[]
-}
-
-export interface PreguntaMultiple extends PreguntaBase {
-  opciones: Opcion[]
-}
-
-🎨 Estructura Recomendada
+# 🔐 INSTRUCCIONES: INTEGRACIÓN AUTENTICACIÓN REACT + SPRING BOOT
+
+## 📋 CONTEXTO DEL PROYECTO
+
+### Información General
+- **Proyecto**: Sistema de gestión de preguntas y tests evaluables
+- **Backend**: Spring Boot 4.0.1 + Java 21
+- **Frontend**: React + Vite
+- **Base de Datos**: MySQL 8.0 (puerto 3307)
+- **Autenticación**: Spring Security con HTTP Basic Authentication
+
+### Backend Ya Implementado
+```java
+// Endpoint de autenticación
+POST /auth/register - Registro de nuevos usuarios
+GET /api/users/me - Obtener usuario actual autenticado
+
+// Sistema de Roles
+- ADMIN: Acceso completo (CRUD preguntas, ver todos los tests)
+- USER: Acceso limitado (realizar tests, ver sus resultados)
+
+// Usuario Precargado
+username: admin
+password: admin (encriptado con BCrypt)
+```
+
+### Configuración CORS (Backend)
+```java
+// Ya configurado para aceptar requests desde:
+http://localhost:5173 (Vite dev server)
+http://localhost:3000 (alternativo)
+
+// Headers permitidos:
+Authorization, Content-Type
+```
+
+---
+
+## 🎯 OBJETIVO DE ESTA TAREA
+
+Implementar un sistema de autenticación en React que:
+1. Permita login/logout de usuarios
+2. Mantenga la sesión activa (incluso al recargar)
+3. Proteja rutas privadas
+4. Inyecte credenciales automáticamente en todas las peticiones API
+5. Maneje errores de autenticación (401, 403)
+
+**IMPORTANTE**: Usar HTTP Basic Authentication (NO JWT, NO OAuth)
+
+---
+
+## 🏗️ ARQUITECTURA DE LA SOLUCIÓN
+
+### Flujo de Autenticación
+```
+1. Usuario ingresa credenciales (username, password)
+2. React codifica credenciales en Base64
+3. Se envía header: Authorization: Basic {base64(username:password)}
+4. Spring Boot valida contra la base de datos
+5. Si válido: retorna datos del usuario
+6. React guarda en Context + LocalStorage
+7. Todas las peticiones posteriores incluyen el header Authorization
+```
+
+### Estructura de Carpetas
+```
 src/
-├── api/                 # ❄️ Comunicación con backend
-│   ├── client.ts       # Configuración de Axios
-│   ├── auth.ts         # Llamadas de autenticación
-│   └── tests.ts        # Llamadas de tests
-├── assets/             # 🖼️ Imágenes, fuentes, etc.
-├── components/         # 🧩 Componentes reutilizables
-│   ├── common/         # Botones, inputs, modales
-│   └── layout/         # Header, Footer, Sidebar
-├── hooks/              # 🪝 Lógica reutilizable con React Hooks
-│   └── useAuth.ts     # Hook de autenticación
-├── pages/              # 📄 Vistas completas
-│   ├── Login.tsx
-│   ├── Dashboard.tsx
-│   └── Test.tsx
-├── types/              # 📝 Definiciones TypeScript
-│   └── index.ts       # Interfaces compartidas
-├── utils/             # 🔧 Utilidades
-│   └── format.ts      # Formateadores
-└── App.tsx            # 🏠 Componente raíz
+├── components/
+│   ├── auth/
+│   │   ├── LoginPage.jsx
+│   │   ├── RegisterPage.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── layout/
+│   │   ├── Navbar.jsx
+│   │   └── Footer.jsx
+│   └── common/
+│       ├── ErrorMessage.jsx
+│       └── LoadingSpinner.jsx
+│
+├── context/
+│   └── AuthContext.jsx
+│
+├── services/
+│   ├── authService.js
+│   └── apiClient.js
+│
+├── utils/
+│   └── authUtils.js
+│
+├── pages/
+│   ├── HomePage.jsx
+│   ├── DashboardPage.jsx
+│   └── AdminPage.jsx
+│
+└── App.jsx
+```
 
-⚙️ Reglas Importantes
+---
 
-Usar componentes reutilizables.
+## 📝 PASOS DE IMPLEMENTACIÓN
 
-Separar lógica de API en carpeta /api.
+### PASO 1: Utilidades de Autenticación (utils/authUtils.js)
 
-Manejar errores HTTP correctamente.
+**Objetivo**: Funciones auxiliares para codificación y almacenamiento
 
-Mostrar loaders en llamadas async.
+**Funciones a implementar**:
+```javascript
+// Codificar credenciales para Basic Auth
+encodeCredentials(username, password) → string
 
-No duplicar lógica de validación (usar validaciones frontend coherentes con backend).
+// Gestión de LocalStorage
+saveAuthData(username, encodedCredentials, user)
+getAuthData() → {username, credentials, user} | null
+clearAuthData()
+```
 
-Respetar soft delete (campo activa).
+**Criterios**:
+- Usar btoa() para codificación Base64
+- Guardar como JSON en localStorage.authData
+- Manejar errores de parsing JSON
 
-🧩 Comportamientos Clave
-Pregunta Multiple
+---
 
-Permitir múltiples checkboxes
+### PASO 2: Cliente API con Axios (services/apiClient.js)
 
-Validar al menos una marcada
+**Objetivo**: Instancia configurada de Axios con interceptores
 
-Edición
+**Configuración**:
+```javascript
+baseURL: 'http://localhost:8080'
+timeout: 10000
+headers: { 'Content-Type': 'application/json' }
+```
 
-Precargar datos correctamente
+**Interceptores a implementar**:
 
-No perder estado de opciones
+**Request Interceptor**:
+- Recuperar credenciales de getAuthData()
+- Si existen: inyectar header Authorization: Basic {credentials}
+- Si no existen: dejar pasar sin header
 
-Seguridad
+**Response Interceptor**:
+- Capturar errores 401 (Unauthorized)
+- Limpiar sesión automáticamente
+- Redirigir a /login
+- Mostrar mensaje de error
 
-Proteger rutas según rol
+---
 
-Si 401 → redirigir a login
+### PASO 3: Servicio de Autenticación (services/authService.js)
 
-🚀 Buenas Prácticas
+**Objetivo**: Lógica de negocio para auth
 
-Usar useEffect correctamente
+**Funciones a implementar**:
 
-Evitar any
+```javascript
+// Login
+async login(username, password) {
+  // 1. Codificar credenciales
+  // 2. Hacer GET /api/users/me con Basic Auth
+  // 3. Si exitoso: guardar datos y retornar user
+  // 4. Si falla: lanzar error
+}
 
-Tipado fuerte siempre
+// Registro
+async register(username, password) {
+  // POST /auth/register con {username, password}
+}
 
-Manejo centralizado de errores
+// Obtener usuario actual
+async getCurrentUser() {
+  // GET /api/users/me (usa credenciales guardadas)
+}
 
-Componentes pequeños y desacoplados
+// Logout
+logout() {
+  // Limpiar localStorage
+}
+```
 
-No mezclar lógica de negocio en componentes
+**Manejo de Errores**:
+- Capturar errores de red
+- Validar respuestas del servidor
+- Retornar mensajes claros
 
-🧪 Testing Manual Esperado
+---
 
-Copilot debe generar código que permita:
+### PASO 4: Context de Autenticación (context/AuthContext.jsx)
 
-Crear preguntas de los 3 tipos
+**Objetivo**: Estado global accesible desde toda la app
 
-Generar test con filtros
+**Estado**:
+```javascript
+{
+  user: null | {id, username, roles},
+  isAuthenticated: false,
+  isLoading: true // importante para carga inicial
+}
+```
 
-Corregir test
+**Funciones del Context**:
+```javascript
+login(username, password) → Promise
+logout()
+register(userData) → Promise
+```
 
-Consultar historial
+**Hook personalizado**:
+```javascript
+export const useAuth = () => useContext(AuthContext)
+```
 
-Activar/desactivar preguntas
+**Inicialización**:
+- Al montar: verificar si hay sesión en localStorage
+- Si hay datos: validar llamando a /api/users/me
+- Si válidos: restaurar sesión
+- Si inválidos: limpiar localStorage
 
-Filtrar desde panel admin
+---
 
-🎯 Objetivo Final
+### PASO 5: Página de Login (components/auth/LoginPage.jsx)
 
-El frontend debe:
+**Campos del formulario**:
+- Username (input text, required)
+- Password (input password, required)
+- Botón "Iniciar Sesión"
+- Link a "¿No tienes cuenta? Regístrate"
 
-Consumir correctamente la API REST ya implementada
+**Validaciones**:
+- Campos no vacíos
+- Mostrar errores del backend
 
-Respetar roles
+**Flujo**:
+```javascript
+1. Usuario completa formulario
+2. Submit → authContext.login(username, password)
+3. Si exitoso → navigate('/dashboard')
+4. Si falla → mostrar mensaje de error
+```
 
-Ser modular y mantenible
+**Estados**:
+- isSubmitting: deshabilitar botón durante petición
+- error: mensaje de error si falla
 
-Permitir ampliar funcionalidades fácilmente
+---
 
-Tener código limpio y tipado fuerte
+### PASO 6: Página de Registro (components/auth/RegisterPage.jsx)
+
+**Campos del formulario**:
+- Username
+- Password
+- Confirmar Password
+
+**Validaciones**:
+- Username: mínimo 3 caracteres
+- Password: mínimo 6 caracteres
+- Passwords coinciden
+
+**Flujo**:
+```javascript
+1. Usuario completa formulario
+2. Validar campos
+3. Submit → authService.register(username, password)
+4. Si exitoso → navigate('/login') con mensaje de éxito
+5. Si falla → mostrar error (ej: "Usuario ya existe")
+```
+
+---
+
+### PASO 7: Protección de Rutas (components/auth/ProtectedRoute.jsx)
+
+**Objetivo**: HOC que protege rutas privadas
+
+**Lógica**:
+```javascript
+function ProtectedRoute({ children, requireAdmin = false }) {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  // Mostrar loading mientras se verifica sesión
+  if (isLoading) return <LoadingSpinner />;
+  
+  // Si no autenticado: redirect a /login
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  
+  // Si requiere admin y no lo es: redirect a /dashboard
+  if (requireAdmin && !user.roles.includes('ADMIN')) {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  // Todo OK: renderizar componente hijo
+  return children;
+}
+```
+
+---
+
+### PASO 8: Navbar Dinámica (components/layout/Navbar.jsx)
+
+**Objetivo**: Navegación que cambia según estado de auth
+
+**Elementos condicionales**:
+
+**Si NO está autenticado**:
+- Logo / Home
+- Botón "Iniciar Sesión"
+- Botón "Registrarse"
+
+**Si SÍ está autenticado**:
+- Logo / Home
+- Link "Dashboard"
+- Link "Mis Tests"
+- Link "Panel Admin" (solo si es ADMIN)
+- Dropdown con:
+  - "Perfil"
+  - "Configuración"
+  - "Cerrar Sesión"
+
+**Datos a mostrar**:
+```javascript
+const { user, isAuthenticated, logout } = useAuth();
+
+// Mostrar: "Bienvenido, {user.username}"
+// Badge con rol: ADMIN / USER
+```
+
+---
+
+### PASO 9: Configuración de Rutas (App.jsx)
+
+**Rutas públicas**:
+```javascript
+/ → HomePage
+/login → LoginPage
+/register → RegisterPage
+```
+
+**Rutas privadas** (requieren autenticación):
+```javascript
+/dashboard → DashboardPage
+/tests → TestsPage
+/tests/:id → TestDetailPage
+/profile → ProfilePage
+```
+
+**Rutas de admin** (requieren rol ADMIN):
+```javascript
+/admin → AdminDashboard
+/admin/preguntas → CRUDPreguntasPage
+/admin/usuarios → GestionUsuariosPage
+```
+
+**Estructura**:
+```jsx
+<AuthProvider>
+  <Router>
+    <Navbar />
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/admin/*" element={
+        <ProtectedRoute requireAdmin>
+          <AdminRoutes />
+        </ProtectedRoute>
+      } />
+    </Routes>
+  </Router>
+</AuthProvider>
+```
+
+---
+
+## 🔧 CONSIDERACIONES TÉCNICAS
+
+### HTTP Basic Authentication
+
+**Formato del Header**:
+```
+Authorization: Basic {base64(username:password)}
+
+Ejemplo:
+username: admin
+password: admin123
+Encoded: YWRtaW46YWRtaW4xMjM=
+Header: Authorization: Basic YWRtaW46YWRtaW4xMjM=
+```
+
+**Codificación en JavaScript**:
+```javascript
+const credentials = btoa(`${username}:${password}`);
+const authHeader = `Basic ${credentials}`;
+```
+
+### Persistencia de Sesión
+
+**¿Qué guardar en LocalStorage?**
+```javascript
+{
+  username: "admin",
+  credentials: "YWRtaW46YWRtaW4xMjM=", // base64 encoded
+  user: {
+    id: 1,
+    username: "admin",
+    roles: ["ADMIN", "USER"]
+  }
+}
+```
+
+**Cuándo limpiar**:
+- Al hacer logout
+- Al recibir error 401
+- Al cerrar sesión manualmente
+
+### Gestión de Errores
+
+**Errores comunes**:
+```javascript
+400 Bad Request → Datos inválidos
+401 Unauthorized → Credenciales incorrectas o sesión expirada
+403 Forbidden → Sin permisos para el recurso
+404 Not Found → Endpoint no existe
+500 Internal Server Error → Error del servidor
+```
+
+**Mensajes al usuario**:
+- 401: "Usuario o contraseña incorrectos"
+- 403: "No tienes permisos para acceder a este recurso"
+- 500: "Error del servidor. Inténtalo más tarde"
+- Network Error: "No se pudo conectar con el servidor"
+
+---
+
+## 🎨 ESTILOS Y UX
+
+### Estados de Carga
+```javascript
+// Mostrar mientras se procesa
+<button disabled={isSubmitting}>
+  {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+</button>
+```
+
+### Mensajes de Error
+```javascript
+{error && (
+  <div className="alert alert-danger" role="alert">
+    {error}
+  </div>
+)}
+```
+
+---
+
+## ✅ CHECKLIST DE VALIDACIÓN
+
+### Testing Manual
+- [ ] Login con credenciales correctas → acceso exitoso
+- [ ] Login con credenciales incorrectas → mensaje de error
+- [ ] Registro de nuevo usuario → éxito + redirect a login
+- [ ] Acceso a ruta privada sin login → redirect a /login
+- [ ] Logout → limpieza de sesión + redirect
+- [ ] Refresh de página → sesión se mantiene
+- [ ] Usuario ADMIN ve rutas de admin
+- [ ] Usuario USER NO ve rutas de admin
+- [ ] Petición API incluye header Authorization
+- [ ] Error 401 → logout automático + redirect
+- [ ] Navbar muestra info correcta según estado
+
+### Validación de Código
+- [ ] No hay credenciales hardcodeadas
+- [ ] Manejo de errores en todos los try-catch
+- [ ] Loading states en todas las peticiones async
+- [ ] Cleanup de efectos con useEffect
+- [ ] PropTypes o TypeScript en componentes
+- [ ] Console.logs eliminados en producción
+
+---
+
+## 🚫 ERRORES COMUNES A EVITAR
+
+### ❌ NO hacer
+```javascript
+// 1. Guardar contraseña en texto plano
+localStorage.setItem('password', password); // NUNCA
+
+// 2. Confiar solo en el frontend
+if (user.role === 'ADMIN') {
+  // Mostrar panel admin SIN validar en backend
+}
+
+// 3. No limpiar sesión en errores 401
+axios.get('/api/endpoint').catch(err => {
+  console.log(err); // Debe hacer logout si es 401
+});
+
+// 4. No manejar estados de carga
+const handleLogin = async () => {
+  await authService.login(); // Sin loading state
+}
+```
+
+### ✅ SÍ hacer
+```javascript
+// 1. Codificar credenciales
+const encoded = btoa(`${username}:${password}`);
+
+// 2. Validar permisos en backend siempre
+// Frontend solo oculta UI, backend rechaza peticiones
+
+// 3. Limpiar sesión automáticamente
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      clearAuthData();
+      window.location.href = '/login';
+    }
+  }
+);
+
+// 4. Manejar estados
+const [isLoading, setIsLoading] = useState(false);
+const handleLogin = async () => {
+  setIsLoading(true);
+  try {
+    await authService.login();
+  } finally {
+    setIsLoading(false);
+  }
+}
+```
+
+---
+
+## 📚 RECURSOS Y REFERENCIAS
+
+### Documentación
+- Axios Interceptors: https://axios-http.com/docs/interceptors
+- React Context API: https://react.dev/reference/react/useContext
+- React Router Protected Routes: https://reactrouter.com/en/main/start/overview
+- HTTP Basic Authentication: https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+
+### Endpoints del Backend
+```
+POST /auth/register
+Body: {username: string, password: string}
+Response: {id, username, roles}
+
+GET /api/users/me
+Headers: Authorization: Basic {credentials}
+Response: {id, username, roles}
+
+GET /api/tests (requiere auth)
+GET /api/admin/preguntas (requiere ADMIN)
+```
+
+---
+
+## 🔄 ORDEN DE DESARROLLO RECOMENDADO
+
+1. authUtils.js → Funciones básicas primero
+2. apiClient.js → Configurar Axios
+3. authService.js → Lógica de negocio
+4. AuthContext.jsx → Estado global
+5. LoginPage.jsx → Primera pantalla funcional
+6. ProtectedRoute.jsx → Protección de rutas
+7. Navbar.jsx → Navegación dinámica
+8. RegisterPage.jsx → Segunda pantalla
+9. App.jsx → Integración completa
+10. Testing → Validar todos los flujos
