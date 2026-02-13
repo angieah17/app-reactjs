@@ -4,6 +4,7 @@ import RegisterPage from './components/auth/RegisterPage'
 import PreguntaMultiple from './components/PreguntaMultiple'
 import PreguntaUnica from './components/PreguntaUnica'
 import PreguntaVF from './components/PreguntaVF'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 
 function App() {
   return (
@@ -13,14 +14,19 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={
-          <>
-            <h1>Inicio (componentes de prueba)</h1>
-            <PreguntaVF />
-            <PreguntaUnica />
-            <PreguntaMultiple />
-          </>
-        } />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <>
+                <h1>Inicio (componentes de prueba)</h1>
+                <PreguntaVF />
+                <PreguntaUnica />
+                <PreguntaMultiple />
+              </>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Routes>
