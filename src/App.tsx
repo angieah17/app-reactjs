@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
+import LoginPage from './components/auth/LoginPage'
 import RegisterPage from './components/auth/RegisterPage'
-import PreguntaMultiple from './components/PreguntaMultiple'
-import PreguntaUnica from './components/PreguntaUnica'
-import PreguntaVF from './components/PreguntaVF'
+import PreguntaMultiple from './pages/PreguntaMultiple'
+import PreguntaUnica from './pages/PreguntaUnica'
+import PreguntaVF from './pages/PreguntaVF'
 import ProtectedRoute from './components/auth/ProtectedRoute'
-import Navbar from './components/Navbar'
+import Navbar from './components/layout/Navbar'
+
 
 function App() {
   return (
