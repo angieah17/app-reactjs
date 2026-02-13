@@ -106,8 +106,7 @@ const PreguntaMultiple = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
 
     // Validación
     if (!enunciado.trim()) {
@@ -210,7 +209,7 @@ const PreguntaMultiple = () => {
             Editando pregunta ID: {editingId}
           </p>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="enunciado">
               <strong>Enunciado *</strong>
