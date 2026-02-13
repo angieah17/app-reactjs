@@ -1,12 +1,7 @@
-import axios, { type AxiosInstance } from "axios";
+import { apiFor } from './apiClient';
 
-const API_BASE = "http://localhost:8080";
-const API_PATH = "/api/preguntas/multiple";
-
-const api: AxiosInstance = axios.create({ //con este método se puede pasar un objeto de configuración común para todas las peticiones, como la URL base y los headers
-  baseURL: API_BASE + API_PATH,
-  headers: { "Content-Type": "application/json" },
-});
+const API_PATH = '/api/preguntas/multiple';
+const api = apiFor(API_PATH);
 
 export interface IPreguntaMultiple {
   id: number | null;

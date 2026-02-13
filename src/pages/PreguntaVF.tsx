@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
-import preguntaUnicaService, {
-  type IPreguntaUnica,
-} from "../services/preguntaUnicaService";
+import preguntaVFService, {
+  type IPreguntaVF,
+} from "../services/preguntaVFService";
 
-const PreguntaUnica = () => {
-  const [preguntas, setPreguntas] = useState<IPreguntaUnica[]>([]);
+const PreguntaVF = () => {
+  const [preguntas, setPreguntas] = useState<IPreguntaVF[]>([]);
   const [cargando, setCargando] = useState(false);
 
   // Estado del formulario de creación/edición
   const [enunciado, setEnunciado] = useState("");
-  const [opciones, setOpciones] = useState<string[]>(["", "", "", ""]);
-  const [respuestaCorrecta, setRespuestaCorrecta] = useState(0);
+  const [respuestaCorrecta, setRespuestaCorrecta] = useState(true);
   const [activa, setActiva] = useState(true);
   const [tematica, setTematica] = useState("");
   const [explicacion, setExplicacion] = useState("");
@@ -20,14 +19,13 @@ const PreguntaUnica = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   // Estado para ver detalles
-  const [detallesId, setDetallesId] = useState<number | null>(null);
-  const [detallesPregunta, setDetallesPregunta] = useState<IPreguntaUnica | null>(null);
+  const [detallesPregunta, setDetallesPregunta] = useState<IPreguntaVF | null>(null);
   const [cargandoDetalles, setCargandoDetalles] = useState(false);
 
   const cargarPreguntas = async () => {
     setCargando(true);
     try {
-      const resp = await preguntaUnicaService.getAll(0, 10);
+      const resp = await preguntaVFService.getAll(0, 10);
       setPreguntas(resp.content);
     } catch (error) {
       console.error("Error cargando preguntas", error);
@@ -36,36 +34,37 @@ const PreguntaUnica = () => {
     }
   };
 
-  const cambiarEstado = async (p: IPreguntaUnica) => {
+  const cambiarEstado = async (p: IPreguntaVF) => {
     if (!p.id) return;
 
     try {
       if (p.activa) {
-        await preguntaUnicaService.desactivar(p.id);
+        await preguntaVFService.desactivar(p.id);
       } else {
-        await preguntaUnicaService.activar(p.id);
+        await preguntaVFService.activar(p.id);
       }
 
-      cargarPreguntas();
+      cargarPreguntas(); // refrescamos la lista
     } catch (error) {
       console.error("Error cambiando estado", error);
     }
   };
 
-  const iniciarEdicion = (p: IPreguntaUnica) => {
+  const iniciarEdicion = (p: IPreguntaVF) => {
     if (!p.id) return;
 
-    setDetallesId(null);
+    // Cerrar modal de detalles si está abierto
     setDetallesPregunta(null);
 
+    // Cargar datos de la pregunta en el formulario
     setEditingId(p.id);
     setEnunciado(p.enunciado);
-    setOpciones([...p.opciones]);
     setRespuestaCorrecta(p.respuestaCorrecta);
-    // No cargamos activa al editar, ya que se maneja con los botones
+    setActiva(p.activa ?? true);
     setTematica(p.tematica);
     setExplicacion(p.explicacion || "");
 
+    // Scroll al formulario
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -76,47 +75,36 @@ const PreguntaUnica = () => {
 
   const limpiarFormulario = () => {
     setEnunciado("");
-    setOpciones(["", "", "", ""]);
-    setRespuestaCorrecta(0);
+    setRespuestaCorrecta(true);
     setActiva(true);
     setTematica("");
     setExplicacion("");
   };
 
-  const verDetalles = (id: number | null) => {
+  const verDetalles = async (id: number | null) => {
     if (!id) return;
-    setDetallesId(id);
+
+    setCargandoDetalles(true);
+    try {
+      const pregunta = await preguntaVFService.getById(id);
+      setDetallesPregunta(pregunta);
+    } catch (error) {
+      console.error("Error cargando detalles de la pregunta", error);
+      alert("Error al cargar los detalles de la pregunta");
+    } finally {
+      setCargandoDetalles(false);
+    }
   };
 
   const cerrarDetalles = () => {
-    setDetallesId(null);
     setDetallesPregunta(null);
   };
 
-  const actualizarOpcion = (index: number, valor: string) => {
-    const nuevasOpciones = [...opciones];
-    nuevasOpciones[index] = valor;
-    setOpciones(nuevasOpciones);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
 
     // Validación
     if (!enunciado.trim()) {
       alert("El enunciado es obligatorio");
-      return;
-    }
-
-    // Validar que todas las opciones estén completas
-    if (opciones.some((op) => !op.trim())) {
-      alert("Todas las opciones deben estar completadas");
-      return;
-    }
-
-    // Validar que la respuesta correcta sea válida
-    if (respuestaCorrecta < 0 || respuestaCorrecta >= opciones.length) {
-      alert("El índice de respuesta correcta no es válido");
       return;
     }
 
@@ -130,23 +118,25 @@ const PreguntaUnica = () => {
     try {
       const preguntaData = {
         enunciado: enunciado.trim(),
-        opciones: opciones.map((op) => op.trim()),
         respuestaCorrecta,
-        ...(editingId === null && { activa }), // Solo incluir activa al crear
+        activa,
         tematica: tematica.trim(),
         explicacion: explicacion.trim() || null,
       };
 
-      console.log("Enviando datos:", preguntaData);
-
       if (editingId !== null) {
-        await preguntaUnicaService.update(editingId, preguntaData);
+        // Modo edición
+        await preguntaVFService.update(editingId, preguntaData);
         setEditingId(null);
       } else {
-        await preguntaUnicaService.create(preguntaData);
+        // Modo creación
+        await preguntaVFService.create(preguntaData);
       }
 
+      // Limpiar formulario
       limpiarFormulario();
+
+      // Recargar lista
       cargarPreguntas();
     } catch (error) {
       console.error("Error guardando pregunta", error);
@@ -156,38 +146,14 @@ const PreguntaUnica = () => {
     }
   };
 
-  // Efecto para cargar detalles cuando cambia detallesId
-  useEffect(() => {
-    if (detallesId === null) {
-      setDetallesPregunta(null);
-      return;
-    }
-
-    const cargarDetalles = async () => {
-      setCargandoDetalles(true);
-      try {
-        const pregunta = await preguntaUnicaService.getById(detallesId);
-        console.log("Datos recibidos del backend:", pregunta);
-        setDetallesPregunta(pregunta);
-      } catch (error) {
-        console.error("Error cargando detalles", error);
-        alert("Error al cargar los detalles");
-        setDetallesId(null);
-      } finally {
-        setCargandoDetalles(false);
-      }
-    };
-
-    cargarDetalles();
-  }, [detallesId]);
-
+  //Se ejecuta una sola vez, justo después de que el componente aparece en pantalla
   useEffect(() => {
     cargarPreguntas();
   }, []);
 
   return (
     <div>
-      <h2>Preguntas de Opción Única</h2>
+      <h2>Preguntas Verdadero / Falso</h2>
 
       {/* Formulario de creación/edición */}
       <section style={{ border: "1px solid #ccc", padding: "15px", marginBottom: "20px" }}>
@@ -197,7 +163,7 @@ const PreguntaUnica = () => {
             Editando pregunta ID: {editingId}
           </p>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="enunciado">
               <strong>Enunciado *</strong>
@@ -215,53 +181,38 @@ const PreguntaUnica = () => {
           </div>
 
           <div style={{ marginBottom: "10px" }}>
-            <strong>Opciones * (Edita todas las opciones)</strong>
-            {opciones.map((opcion, index) => (
-              <div key={index} style={{ marginTop: "5px" }}>
-                <label htmlFor={`opcion-${index}`}>
-                  Opción {index + 1}
-                </label>
-                <br />
-                <input
-                  id={`opcion-${index}`}
-                  type="text"
-                  value={opcion}
-                  onChange={(e) => actualizarOpcion(index, e.target.value)}
-                  placeholder={`Escribe la opción ${index + 1}`}
-                  style={{ width: "100%" }}
-                />
-              </div>
-            ))}
+            <strong>Respuesta Correcta *</strong>
+            <br />
+            <label>
+              <input
+                type="radio"
+                name="respuestaCorrecta"
+                checked={respuestaCorrecta === true}
+                onChange={() => setRespuestaCorrecta(true)}
+              />
+              Verdadero
+            </label>
+            <label style={{ marginLeft: "15px" }}>
+              <input
+                type="radio"
+                name="respuestaCorrecta"
+                checked={respuestaCorrecta === false}
+                onChange={() => setRespuestaCorrecta(false)}
+              />
+              Falso
+            </label>
           </div>
 
           <div style={{ marginBottom: "10px" }}>
-            <strong>Respuesta Correcta *</strong>
-            <br />
-            {opciones.map((opcion, index) => (
-              <label key={index} style={{ display: "block", marginTop: "5px" }}>
-                <input
-                  type="radio"
-                  name="respuestaCorrecta"
-                  checked={respuestaCorrecta === index}
-                  onChange={() => setRespuestaCorrecta(index)}
-                />
-                Opción {index + 1}
-              </label>
-            ))}
+            <label>
+              <input
+                type="checkbox"
+                checked={activa}
+                onChange={(e) => setActiva(e.target.checked)}
+              />
+              {editingId !== null ? "Activa" : "Activa al crear"}
+            </label>
           </div>
-
-          {editingId === null && (
-            <div style={{ marginBottom: "10px" }}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={activa}
-                  onChange={(e) => setActiva(e.target.checked)}
-                />
-                Activa al crear
-              </label>
-            </div>
-          )}
 
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="tematica">
@@ -323,9 +274,7 @@ const PreguntaUnica = () => {
           <li key={p.id}>
             <strong>{p.enunciado}</strong>
             <br />
-            Opciones: {p.opciones.length}
-            <br />
-            Respuesta correcta: Opción {p.respuestaCorrecta + 1} ({p.opciones[p.respuestaCorrecta]})
+            Respuesta correcta: {p.respuestaCorrecta ? "Verdadero" : "Falso"}
             <br />
             Estado: {p.activa ? "Activa" : "Inactiva"}
             {p.tematica && (
@@ -355,11 +304,11 @@ const PreguntaUnica = () => {
       </ul>
 
       {/* Modal de detalles */}
-      {detallesId !== null && detallesPregunta && (
+      {detallesPregunta && (
         <div style={modalStyles.overlay} onClick={cerrarDetalles}>
           <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={modalStyles.header}>
-              <h2>Detalles de la Pregunta (ID: {detallesPregunta.id})</h2>
+              <h2>Detalles de la Pregunta</h2>
               <button 
                 onClick={cerrarDetalles}
                 style={modalStyles.closeButton}
@@ -370,9 +319,7 @@ const PreguntaUnica = () => {
             </div>
 
             {cargandoDetalles ? (
-              <div style={modalStyles.content}>
-                <p>Cargando...</p>
-              </div>
+              <p style={{ padding: "15px" }}>Cargando...</p>
             ) : (
               <div style={modalStyles.content}>
                 <div style={{ marginBottom: "15px" }}>
@@ -381,24 +328,10 @@ const PreguntaUnica = () => {
                 </div>
 
                 <div style={{ marginBottom: "15px" }}>
-                  <strong>Opciones:</strong>
-                  <ol>
-                    {Array.isArray(detallesPregunta.opciones) && detallesPregunta.opciones.map((opcion, index) => (
-                      <li 
-                        key={`${detallesPregunta.id}-opt-${index}`}
-                        style={{
-                          color: index === detallesPregunta.respuestaCorrecta ? "#0066cc" : "inherit",
-                          fontWeight: index === detallesPregunta.respuestaCorrecta ? "bold" : "normal",
-                          backgroundColor: index === detallesPregunta.respuestaCorrecta ? "#f0f8ff" : "transparent",
-                          padding: "5px",
-                          marginBottom: "5px"
-                        }}
-                      >
-                        {opcion}
-                        {index === detallesPregunta.respuestaCorrecta && " ✓"}
-                      </li>
-                    ))}
-                  </ol>
+                  <strong>Respuesta Correcta:</strong>
+                  <p style={{ color: "#0066cc", fontWeight: "bold" }}>
+                    {detallesPregunta.respuestaCorrecta ? "Verdadero" : "Falso"}
+                  </p>
                 </div>
 
                 {detallesPregunta.explicacion ? (
@@ -415,7 +348,9 @@ const PreguntaUnica = () => {
             )}
 
             <div style={modalStyles.footer}>
-              <button onClick={cerrarDetalles}>
+              <button 
+                onClick={cerrarDetalles}
+              >
                 Cerrar
               </button>
             </div>
@@ -475,4 +410,4 @@ const modalStyles = {
   },
 };
 
-export default PreguntaUnica;
+export default PreguntaVF;
