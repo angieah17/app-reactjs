@@ -8,9 +8,14 @@ import {
   useState,
 } from 'react'
 import type { ReactNode } from 'react'
+import {
+  clearAuthData,
+  encodeCredentials,
+  getAuthData,
+  saveAuthData,
+} from '../utils/authUtils'
 
 const API_BASE_URL = 'http://localhost:8080'
-const AUTH_STORAGE_KEY = 'authData' //clave usada en localStorage para guardar los datos de autenticación
 
 // Configuración de Axios para manejar las solicitudes HTTP al backend. Se establece la URL base, un tiempo de espera y el tipo de contenido.
 const apiClient = axios.create({
@@ -31,39 +36,6 @@ export interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
-
-// Función para codificar las credenciales en Base64, de esta manera, la contraseña no se almacena en texto plano y se pierdan datos durante la transmisión, aunque sigue siendo reversible. Para mayor seguridad, se recomienda usar tokens JWT o sesiones en el backend.
-const encodeCredentials = (username: string, password: string): string => {
-  const input = `${username}:${password}`
-  const bytes = new TextEncoder().encode(input) // Codifica la cadena en UTF-8
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('') // Convierte los bytes a una cadena binaria
-  return btoa(binary) // Codifica la cadena binaria en Base64
-}
-
-// Funciones para manejar el almacenamiento de datos de autenticación en localStorage. 
-// Se guardan el nombre de usuario, las credenciales codificadas y los datos del usuario actual. 
-const saveAuthData = (username: string, credentials: string, user: any): void => {
-  localStorage.setItem(
-    AUTH_STORAGE_KEY,
-    JSON.stringify({ username, credentials, user }),
-  )
-}
-
-// Recupera y parsea los datos a JSON; si está corrupto o incompleto, devuelve null.
-const getAuthData = (): { username: string; credentials: string; user: any } | null => {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    if (!parsed?.credentials || !parsed?.user) return null
-    return parsed
-  } catch {
-    return null
-  }
-}
-
-const clearAuthData = () => localStorage.removeItem(AUTH_STORAGE_KEY) //Borra la sesión local.
-
 
 const parseAxiosErrorMessage = (error: unknown, fallback: string): string => {
   if (!axios.isAxiosError(error)) return fallback //si no es un error de Axios, devuelve el mensaje de error original o el mensaje de fallback.
