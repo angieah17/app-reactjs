@@ -1,17 +1,16 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './components/auth/RegisterPage'
 import PreguntaMultiple from './components/PreguntaMultiple'
 import PreguntaUnica from './components/PreguntaUnica'
 import PreguntaVF from './components/PreguntaVF'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import Navbar from './components/Navbar'
 
 function App() {
   return (
     <BrowserRouter>
-      <nav>
-        <Link to="/">Inicio</Link> | <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
-      </nav>
+      <Navbar />
 
       <Routes>
         <Route
@@ -29,6 +28,24 @@ function App() {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        {/* Rutas de ejemplo para enlaces condicionales */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <h2>Panel Admin (acceso restringido)</h2>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mis-preguntas"
+          element={
+            <ProtectedRoute>
+              <h2>Mis Preguntas (usuario)</h2>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   )
