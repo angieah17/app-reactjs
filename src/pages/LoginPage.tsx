@@ -1,15 +1,22 @@
-import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import React, { useState } from 'react'
 
-function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLoginSuccess }) {
+import { useAuth } from '../context/AuthContext.tsx'
+
+interface LoginPageProps {
+	redirectTo?: string
+	registerPath?: string
+	onLoginSuccess?: () => void
+}
+
+function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLoginSuccess }: LoginPageProps): React.ReactElement {
 	const { login } = useAuth()
 
-	const [username, setUsername] = useState('')
-	const [password, setPassword] = useState('')
-	const [error, setError] = useState('')
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const [username, setUsername] = useState<string>('')
+	const [password, setPassword] = useState<string>('')
+	const [error, setError] = useState<string>('')
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
-	const handleSubmit = async (event) => {
+	const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
 		event.preventDefault()
 		setError('')
 
@@ -31,8 +38,10 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 			} else {
 				window.location.assign(redirectTo)
 			}
-		} catch (submitError) {
-			setError(submitError?.message || 'Usuario o contraseña incorrectos.')
+		} catch (submitError: unknown) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const anyErr = submitError as any
+			setError(anyErr?.message || 'Usuario o contraseña incorrectos.')
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -50,8 +59,8 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 						name="username"
 						type="text"
 						autoComplete="username"
-						value={username}
-						onChange={(event) => setUsername(event.target.value)}
+										value={username}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setUsername(event.target.value)}
 						required
 					/>
 				</div>
@@ -63,8 +72,8 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 						name="password"
 						type="password"
 						autoComplete="current-password"
-						value={password}
-						onChange={(event) => setPassword(event.target.value)}
+										value={password}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
 						required
 					/>
 				</div>
