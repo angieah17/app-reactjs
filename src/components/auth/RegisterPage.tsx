@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { register } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -33,30 +35,11 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), password })
-      })
-
-      if (res.ok) {
-        // Registro exitoso → redirigir a login
-        navigate('/login')
-        return
-      }
-
-      // intentar leer mensaje de error del backend
-      let msg = 'Error en el registro'
-      try {
-        const json = await res.json()
-        msg = json?.message || JSON.stringify(json)
-      } catch {
-        const text = await res.text()
-        if (text) msg = text
-      }
-      setError(msg)
-    } catch (err) {
-      setError('No se pudo conectar con el servidor.')
+      await register({ username: username.trim(), password })
+      navigate('/login')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'No se pudo completar el registro.'
+      setError(message)
     } finally {
       setIsSubmitting(false)
     }

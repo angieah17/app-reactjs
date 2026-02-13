@@ -14,15 +14,7 @@ import {
   getAuthData,
   saveAuthData,
 } from '../utils/authUtils'
-
-const API_BASE_URL = 'http://localhost:8080'
-
-// Configuración de Axios para manejar las solicitudes HTTP al backend. Se establece la URL base, un tiempo de espera y el tipo de contenido.
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
-})
+import { apiRoot } from '../services/apiClient'
 
 type AuthUser = any
 
@@ -49,7 +41,7 @@ const parseAxiosErrorMessage = (error: unknown, fallback: string): string => {
 // Función para obtener los datos del usuario actual desde el backend usando las credenciales codificadas. 
 // Si la solicitud es exitosa, devuelve los datos del usuario; de lo contrario, lanza un error.
 const getCurrentUserRequest = async (credentials: string): Promise<any> => {
-  const response = await apiClient.get('/auth/me', {
+  const response = await apiRoot.get('/auth/me', {
     headers: { Authorization: `Basic ${credentials}` }, // Se envían las credenciales codificadas en el encabezado Authorization usando el esquema Basic 64 que está esperando Spring Security.
   })
   return response.data
@@ -110,7 +102,7 @@ export function AuthProvider({ children }: { children?: ReactNode }): ReactNode 
     }
 
     try {
-      const response = await apiClient.post('/auth/register', { // Se envían el nombre de usuario y la contraseña en el cuerpo de la solicitud para registrar al nuevo usuario.
+      const response = await apiRoot.post('/auth/register', { // Se envían el nombre de usuario y la contraseña en el cuerpo de la solicitud para registrar al nuevo usuario.
         username: payload.username,
         password: payload.password,
       })
