@@ -6,14 +6,16 @@ import PreguntaUnica from './pages/PreguntaUnica'
 import PreguntaVF from './pages/PreguntaVF'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
+import { AuthProvider } from './context/AuthContext'
 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
 
-      <Routes>
+        <Routes>
         <Route
           path="/"
           element={
@@ -47,8 +49,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
