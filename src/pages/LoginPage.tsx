@@ -16,8 +16,7 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 	const [error, setError] = useState<string>('')
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
-	const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
-		event.preventDefault()
+	const handleSubmit = async (): Promise<void> => {
 		setError('')
 
 		const normalizedUsername = username.trim()
@@ -51,7 +50,7 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 		<section>
 			<h1>Iniciar Sesión</h1>
 
-			<form onSubmit={handleSubmit} noValidate>
+			<form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} noValidate>
 				<div>
 					<label htmlFor="username">Username</label>
 					<input
