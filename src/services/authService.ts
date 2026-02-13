@@ -3,11 +3,27 @@
  * Servicio simple de autenticación para el cliente (TypeScript).
  */
 
-type User = Record<string, any>;
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import { apiRoot } from './api';
 
-const API_BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.VITE_API_BASE)
-  ? (import.meta as any).env.VITE_API_BASE
-  : '';
+interface User {
+  id?: number;
+  username?: string;
+  email?: string;
+  roles?: string[];
+  createdAt?: string;
+  [key: string]: any;
+}
+
+interface AuthResponse {
+  token?: string;
+  accessToken?: string;
+  user?: User;
+  [key: string]: any;
+}
+
+// use shared root api instance (base URL configured in src/services/api.ts)
+const api: AxiosInstance = apiRoot;
 
 function authHeader(): Record<string, string> {
   const token = localStorage.getItem('authToken');
@@ -15,58 +31,41 @@ function authHeader(): Record<string, string> {
   return { Authorization: token };
 }
 
-export async function login(username: string, password: string): Promise<any> {
+export async function login(username: string, password: string): Promise<AuthResponse | User> {
   try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+    const res: AxiosResponse<AuthResponse> = await api.post('/auth/login', { username, password });
+    const data = res.data;
 
-    if (res.ok) {
-      const data = await res.json();
-      let tokenStr: string | null = null;
-      if (data.token) tokenStr = `Bearer ${data.token}`;
-      else if (data.accessToken) tokenStr = `Bearer ${data.accessToken}`;
+    let tokenStr: string | null = null;
+    if (data.token) tokenStr = `Bearer ${data.token}`;
+    else if (data.accessToken) tokenStr = `Bearer ${data.accessToken}`;
 
-      if (tokenStr) localStorage.setItem('authToken', tokenStr);
-      if (data.user) localStorage.setItem('currentUser', JSON.stringify(data.user));
-      else if (data.user === undefined) localStorage.setItem('currentUser', JSON.stringify(data));
+    if (tokenStr) localStorage.setItem('authToken', tokenStr);
+    if (data.user) localStorage.setItem('currentUser', JSON.stringify(data.user));
+    else localStorage.setItem('currentUser', JSON.stringify(data));
 
-      return data;
-    }
-
-    if (res.status === 401 || res.status === 404) {
+    return data;
+  } catch (err: any) {
+    // fallback: try Basic auth to /auth/me
+    if (err?.response && (err.response.status === 401 || err.response.status === 404)) {
       const basic = 'Basic ' + btoa(`${username}:${password}`);
-      const res2 = await fetch(`${API_BASE}/auth/me`, {
-        headers: { Authorization: basic },
-      });
-      if (res2.ok) {
-        const user = await res2.json();
+      try {
+        const res2: AxiosResponse<User> = await api.get('/auth/me', { headers: { Authorization: basic } });
+        const user = res2.data;
         localStorage.setItem('authToken', basic);
         localStorage.setItem('currentUser', JSON.stringify(user));
         return user;
+      } catch (err2) {
+        throw err2;
       }
     }
-
-    const text = await res.text();
-    throw new Error(text || 'Login failed');
-  } catch (err) {
     throw err;
   }
 }
 
 export async function register(userData: Record<string, any>): Promise<any> {
-  const res = await fetch(`${API_BASE}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || 'Register failed');
-  }
-  return res.json();
+  const res = await api.post('/auth/register', userData);
+  return res.data;
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -82,11 +81,14 @@ export async function getCurrentUser(): Promise<User | null> {
   const headers = authHeader();
   if (!headers.Authorization) return null;
 
-  const res = await fetch(`${API_BASE}/auth/me`, { headers });
-  if (!res.ok) return null;
-  const user = await res.json();
-  localStorage.setItem('currentUser', JSON.stringify(user));
-  return user as User;
+  try {
+    const res: AxiosResponse<User> = await api.get('/auth/me', { headers });
+    const user = res.data;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    return user;
+  } catch (e) {
+    return null;
+  }
 }
 
 export function logout(): void {
