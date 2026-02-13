@@ -4,7 +4,7 @@
  */
 
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import { apiRoot } from './api';
+import { apiRoot } from './apiClient';
 
 interface User {
   id?: number;

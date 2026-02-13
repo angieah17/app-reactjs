@@ -1,4 +1,4 @@
-import { apiFor } from './api';
+import { apiFor } from './apiClient';
 
 const API_PATH = '/api/preguntas/unica';
 const api = apiFor(API_PATH);
