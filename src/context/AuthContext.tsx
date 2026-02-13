@@ -1,5 +1,13 @@
 import axios from 'axios'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import type { ReactNode } from 'react'
 
 const API_BASE_URL = 'http://localhost:8080'
 const AUTH_STORAGE_KEY = 'authData' //clave usada en localStorage para guardar los datos de autenticación
@@ -11,10 +19,21 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-const AuthContext = createContext(undefined)
+type AuthUser = any
+
+export interface AuthContextValue {
+  user: AuthUser | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (username: string, password: string) => Promise<AuthUser>
+  logout: () => void
+  register: (userData: any, password?: string) => Promise<any>
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 // Función para codificar las credenciales en Base64, de esta manera, la contraseña no se almacena en texto plano y se pierdan datos durante la transmisión, aunque sigue siendo reversible. Para mayor seguridad, se recomienda usar tokens JWT o sesiones en el backend.
-const encodeCredentials = (username, password) => {
+const encodeCredentials = (username: string, password: string): string => {
   const input = `${username}:${password}`
   const bytes = new TextEncoder().encode(input) // Codifica la cadena en UTF-8
   const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('') // Convierte los bytes a una cadena binaria
@@ -23,7 +42,7 @@ const encodeCredentials = (username, password) => {
 
 // Funciones para manejar el almacenamiento de datos de autenticación en localStorage. 
 // Se guardan el nombre de usuario, las credenciales codificadas y los datos del usuario actual. 
-const saveAuthData = (username, credentials, user) => {
+const saveAuthData = (username: string, credentials: string, user: any): void => {
   localStorage.setItem(
     AUTH_STORAGE_KEY,
     JSON.stringify({ username, credentials, user }),
@@ -31,7 +50,7 @@ const saveAuthData = (username, credentials, user) => {
 }
 
 // Recupera y parsea los datos a JSON; si está corrupto o incompleto, devuelve null.
-const getAuthData = () => {
+const getAuthData = (): { username: string; credentials: string; user: any } | null => {
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY)
     if (!raw) return null
@@ -46,16 +65,18 @@ const getAuthData = () => {
 const clearAuthData = () => localStorage.removeItem(AUTH_STORAGE_KEY) //Borra la sesión local.
 
 
-const parseAxiosErrorMessage = (error, fallback) => {
+const parseAxiosErrorMessage = (error: unknown, fallback: string): string => {
   if (!axios.isAxiosError(error)) return fallback //si no es un error de Axios, devuelve el mensaje de error original o el mensaje de fallback.
   const data = error.response?.data
   if (typeof data === 'string') return data //si la respuesta es un string, se asume que es el mensaje de error.
-  return data?.message || data?.error || error.message || fallback
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const anyErr = error as any
+  return data?.message || data?.error || anyErr.message || fallback
 }
 
 // Función para obtener los datos del usuario actual desde el backend usando las credenciales codificadas. 
 // Si la solicitud es exitosa, devuelve los datos del usuario; de lo contrario, lanza un error.
-const getCurrentUserRequest = async (credentials) => {
+const getCurrentUserRequest = async (credentials: string): Promise<any> => {
   const response = await apiClient.get('/auth/me', {
     headers: { Authorization: `Basic ${credentials}` }, // Se envían las credenciales codificadas en el encabezado Authorization usando el esquema Basic 64 que está esperando Spring Security.
   })
@@ -63,20 +84,20 @@ const getCurrentUserRequest = async (credentials) => {
 }
 
 // Componente proveedor de autenticación que maneja el estado de autenticación, las funciones de inicio de sesión, cierre de sesión y registro, y proporciona estos valores a través del contexto a los componentes hijos.
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+export function AuthProvider({ children }: { children?: ReactNode }): ReactNode {
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   //en el cierre de sesión, se limpian los datos de autenticación, se establece el usuario en null y se marca como no autenticado.
-  const logout = useCallback(() => {
+  const logout = useCallback((): void => {
     clearAuthData()
     setUser(null)
     setIsAuthenticated(false)
   }, [])
 
   // Función de inicio de sesión que valida las credenciales, realiza la solicitud al backend para obtener los datos del usuario, y maneja el estado de autenticación en consecuencia. Si las credenciales son inválidas o hay un error en la solicitud, se limpian los datos de autenticación y se lanza un error con un mensaje descriptivo.
-  const login = useCallback(async (username, password) => {
+  const login = useCallback(async (username: string, password: string): Promise<AuthUser> => {
     if (!username || !password) {
       throw new Error('Usuario y contraseña son obligatorios.')
     }
@@ -106,7 +127,7 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const register = useCallback(async (userData, plainPassword) => { // Permite registrar un nuevo usuario. Acepta un objeto con los datos del usuario o un nombre de usuario y contraseña separados. Valida que se proporcionen ambos campos, realiza la solicitud al backend para registrar al usuario, y maneja cualquier error que pueda ocurrir durante el proceso.
+  const register = useCallback(async (userData: any, plainPassword?: string): Promise<any> => { // Permite registrar un nuevo usuario. Acepta un objeto con los datos del usuario o un nombre de usuario y contraseña separados. Valida que se proporcionen ambos campos, realiza la solicitud al backend para registrar al usuario, y maneja cualquier error que pueda ocurrir durante el proceso.
     const payload =
       typeof userData === 'object' && userData !== null
         ? userData
@@ -162,7 +183,7 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const value = useMemo(
+  const value: AuthContextValue = useMemo(
     () => ({ user, isAuthenticated, isLoading, login, logout, register }),
     [user, isAuthenticated, isLoading, login, logout, register],
   )
