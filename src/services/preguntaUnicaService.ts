@@ -1,12 +1,7 @@
-import axios, { type AxiosInstance } from "axios";
+import { apiFor } from './api';
 
-const API_BASE = "http://localhost:8080";
-const API_PATH = "/api/preguntas/unica";
-
-const api: AxiosInstance = axios.create({
-  baseURL: API_BASE + API_PATH,
-  headers: { "Content-Type": "application/json" },
-});
+const API_PATH = '/api/preguntas/unica';
+const api = apiFor(API_PATH);
 
 export interface IPreguntaUnica {
   id: number | null;
