@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext.tsx'
 
@@ -8,8 +9,28 @@ interface LoginPageProps {
 	onLoginSuccess?: () => void
 }
 
-function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLoginSuccess }: LoginPageProps): React.ReactElement {
-	const { login } = useAuth()
+/* Regla implementada: si rol contiene ADMIN, redirige a /admin.
+Regla implementada: autenticado no admin, redirige a /mis-preguntas.
+Regla implementada: si entra a /login ya autenticado, se redirige automáticamente según rol.
+  */
+
+function getRoles(user: any): string[] {
+	if (!user) return []
+	if (Array.isArray(user.roles)) return user.roles.map((r: any) => r?.authority || r?.name || String(r))
+	if (user.roles) return [String(user.roles)]
+	if (user.role) return [String(user.role)]
+	return []
+}
+
+function getPostLoginPath(user: any): string {
+	const roles = getRoles(user)
+	const isAdmin = roles.some((r) => String(r).toUpperCase().includes('ADMIN'))
+	return isAdmin ? '/admin' : '/mis-preguntas'
+}
+
+function LoginPage({ redirectTo, registerPath = '/register', onLoginSuccess }: LoginPageProps): React.ReactElement {
+	const { login, user, isAuthenticated, isLoading } = useAuth()
+	const navigate = useNavigate()
 
 	const [username, setUsername] = useState<string>('')
 	const [password, setPassword] = useState<string>('')
@@ -30,12 +51,12 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 		setIsSubmitting(true)
 
 		try {
-			await login(normalizedUsername, normalizedPassword)
+			const currentUser = await login(normalizedUsername, normalizedPassword)
 
 			if (typeof onLoginSuccess === 'function') {
 				onLoginSuccess()
 			} else {
-				window.location.assign(redirectTo)
+				navigate(redirectTo ?? getPostLoginPath(currentUser), { replace: true })
 			}
 		} catch (submitError: unknown) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +65,10 @@ function LoginPage({ redirectTo = '/dashboard', registerPath = '/register', onLo
 		} finally {
 			setIsSubmitting(false)
 		}
+	}
+
+	if (!isLoading && isAuthenticated) {
+		return <Navigate to={getPostLoginPath(user)} replace />
 	}
 
 	return (

@@ -16,8 +16,6 @@ interface User {
 }
 
 interface AuthResponse {
-  token?: string;
-  accessToken?: string;
   user?: User;
   [key: string]: any;
 }
@@ -32,35 +30,12 @@ function authHeader(): Record<string, string> {
 }
 
 export async function login(username: string, password: string): Promise<AuthResponse | User> {
-  try {
-    const res: AxiosResponse<AuthResponse> = await api.post('/auth/login', { username, password });
-    const data = res.data;
-
-    let tokenStr: string | null = null;
-    if (data.token) tokenStr = `Bearer ${data.token}`;
-    else if (data.accessToken) tokenStr = `Bearer ${data.accessToken}`;
-
-    if (tokenStr) localStorage.setItem('authToken', tokenStr);
-    if (data.user) localStorage.setItem('currentUser', JSON.stringify(data.user));
-    else localStorage.setItem('currentUser', JSON.stringify(data));
-
-    return data;
-  } catch (err: any) {
-    // fallback: try Basic auth to /auth/me
-    if (err?.response && (err.response.status === 401 || err.response.status === 404)) {
-      const basic = 'Basic ' + btoa(`${username}:${password}`);
-      try {
-        const res2: AxiosResponse<User> = await api.get('/auth/me', { headers: { Authorization: basic } });
-        const user = res2.data;
-        localStorage.setItem('authToken', basic);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        return user;
-      } catch (err2) {
-        throw err2;
-      }
-    }
-    throw err;
-  }
+  const basic = 'Basic ' + btoa(`${username}:${password}`);
+  const res: AxiosResponse<User> = await api.get('/auth/me', { headers: { Authorization: basic } });
+  const user = res.data;
+  localStorage.setItem('authToken', basic);
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  return user;
 }
 
 export async function register(userData: Record<string, any>): Promise<any> {

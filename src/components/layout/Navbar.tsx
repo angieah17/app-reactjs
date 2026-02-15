@@ -32,10 +32,12 @@ export default function Navbar() {
   return (
     <header style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 1rem', borderBottom: '1px solid #ddd'}}>
       <nav style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
-        <Link to="/">Inicio</Link>
-        {isAuthenticated && isAdmin && <Link to="/admin">Admin</Link>}
-        {isAuthenticated && !isAdmin && <Link to="/mis-preguntas">Mis Preguntas</Link>}
+        {!isAuthenticated && <Link to="/login">Login</Link>}
         {!isAuthenticated && <Link to="/register">Register</Link>}
+
+        {isAuthenticated && <Link to="/mis-preguntas">Mis Tests</Link>}
+        {isAuthenticated && <Link to="/tests/historial">Historial</Link>}
+        {isAuthenticated && isAdmin && <Link to="/admin">Admin</Link>}
       </nav>
 
       <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>

@@ -6,6 +6,50 @@ const BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env && 
 
 const AUTH_STORAGE_KEY = 'authData';
 
+export function getBackendErrorMessage(error: unknown, fallback: string): string {
+  if (!error || typeof error !== 'object') return fallback;
+
+  const maybeAxios = error as {
+    response?: {
+      status?: number;
+      data?: unknown;
+    };
+    message?: string;
+  };
+
+  const status = maybeAxios.response?.status;
+  const data = maybeAxios.response?.data;
+
+  if (typeof data === 'string' && data.trim().length > 0) {
+    return data;
+  }
+
+  if (data && typeof data === 'object') {
+    const typed = data as { message?: unknown; error?: unknown };
+    if (typeof typed.message === 'string' && typed.message.trim().length > 0) {
+      return typed.message;
+    }
+    if (typeof typed.error === 'string' && typed.error.trim().length > 0) {
+      return typed.error;
+    }
+  }
+
+  switch (status) {
+    case 400:
+      return 'Solicitud inválida (400). Revisa los datos enviados.';
+    case 401:
+      return 'Sesión no válida o expirada (401). Inicia sesión nuevamente.';
+    case 403:
+      return 'No tienes permisos para esta acción (403).';
+    case 404:
+      return 'Recurso no encontrado (404).';
+    case 500:
+      return 'Error interno del servidor (500).';
+    default:
+      return maybeAxios.message || fallback;
+  }
+}
+
 function getStoredAuthorization(): string | null {
   const bearer = localStorage.getItem('authToken');
   if (bearer) return bearer;
@@ -42,6 +86,14 @@ function attachInterceptors(instance: AxiosInstance): AxiosInstance {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
         localStorage.removeItem(AUTH_STORAGE_KEY);
+
+        if (typeof window !== 'undefined') {
+          const path = window.location.pathname;
+          const isAuthRoute = path === '/login' || path === '/register';
+          if (!isAuthRoute) {
+            window.location.assign('/login');
+          }
+        }
       }
       return Promise.reject(error);
     },
