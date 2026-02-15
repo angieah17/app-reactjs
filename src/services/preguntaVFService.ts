@@ -1,7 +1,7 @@
 import { apiFor } from './apiClient';
 import adminPreguntaService, { type AdminListFilters } from './adminPreguntaService';
 
-const API_PATH = '/api/preguntas/vf';
+const API_PATH = '/api/admin/preguntas/verdadero-falso';
 const api = apiFor(API_PATH);
 
 export interface IPreguntaVF {
@@ -17,7 +17,7 @@ export interface IPreguntaVF {
 
 export interface PagedResponse<T> { //esta interfaz es genérica, lo que significa que puede ser utilizada con cualquier tipo de dato (en este caso, con IPreguntaVF) y se adapta a la estructura de respuesta paginada que devuelve el backend
   content: T[];
-  //pageable?: unknown; Si esn algún momento se necesita acceder a la información de paginación (como el número de página actual, el tamaño de página, etc.) se puede descomentar esta línea y definir la estructura de este objeto según lo que devuelva el backend.
+  //pageable?: unknown; Si en algún momento se necesita acceder a la información de paginación (como el número de página actual, el tamaño de página, etc.) se puede descomentar esta línea y definir la estructura de este objeto según lo que devuelva el backend.
   totalElements?: number;
   totalPages?: number;
   size?: number;
@@ -34,10 +34,10 @@ export interface PagedResponse<T> { //esta interfaz es genérica, lo que signifi
   "size": 10,
   "number": 0
 }
+  */
+}
 
 export interface AdminPreguntaVFFilters extends Omit<AdminListFilters, 'tipo'> {}
-   *  */ 
-}
 
 // GET paginado Petición real: GET http://localhost:8080/api/preguntas/vf?page=0&size=10
 export const getAll = async (
