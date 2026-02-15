@@ -1,9 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './components/auth/LoginPage'
 import RegisterPage from './components/auth/RegisterPage'
-import PreguntaMultiple from './pages/PreguntaMultiple'
-import PreguntaUnica from './pages/PreguntaUnica'
-import PreguntaVF from './pages/PreguntaVF'
+import AdminQuestionsPage from './pages/AdminQuestionsPage'
+import AdminQuestionDetailPage from './pages/AdminQuestionDetailPage'
 import TestGeneratePage from './pages/TestGeneratePage'
 import TestHistoryPage from './pages/TestHistoryPage'
 import TestPlayPage from './pages/TestPlayPage'
@@ -36,28 +35,6 @@ function HomeRoute() {
   const roles = getRoles(user)
   const isAdmin = roles.some((role) => String(role).toUpperCase().includes('ADMIN'))
   return <Navigate to={isAdmin ? '/admin' : '/mis-preguntas'} replace />
-}
-
-function AdminPanelPage() {
-  return (
-    <section style={{ padding: '1rem', maxWidth: 760 }}>
-      <h1>Panel de administración</h1>
-      <p style={{ marginTop: 0 }}>
-        Gestiona preguntas por tipo y accede al flujo de tests.
-      </p>
-
-      <div style={{ display: 'grid', gap: '0.5rem', marginBottom: '1rem' }}>
-        <Link to="/admin/preguntas/vf">CRUD Preguntas Verdadero/Falso</Link>
-        <Link to="/admin/preguntas/unica">CRUD Preguntas Única</Link>
-        <Link to="/admin/preguntas/multiple">CRUD Preguntas Múltiple</Link>
-      </div>
-
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
-        <Link to="/tests/generar">Ir a Generar Test</Link>
-        <Link to="/tests/historial">Ir a Historial</Link>
-      </div>
-    </section>
-  )
 }
 
 function App() {
@@ -107,31 +84,15 @@ function App() {
           path="/admin"
           element={
             <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
-              <AdminPanelPage />
+              <AdminQuestionsPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/admin/preguntas/vf"
+          path="/admin/preguntas/:id"
           element={
             <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
-              <PreguntaVF />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/preguntas/unica"
-          element={
-            <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
-              <PreguntaUnica />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/preguntas/multiple"
-          element={
-            <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
-              <PreguntaMultiple />
+              <AdminQuestionDetailPage />
             </ProtectedRoute>
           }
         />
