@@ -1,4 +1,5 @@
 import { apiFor } from './apiClient';
+import adminPreguntaService, { type AdminListFilters } from './adminPreguntaService';
 
 const API_PATH = '/api/preguntas/vf';
 const api = apiFor(API_PATH);
@@ -33,6 +34,8 @@ export interface PagedResponse<T> { //esta interfaz es genérica, lo que signifi
   "size": 10,
   "number": 0
 }
+
+export interface AdminPreguntaVFFilters extends Omit<AdminListFilters, 'tipo'> {}
    *  */ 
 }
 
@@ -40,15 +43,33 @@ export interface PagedResponse<T> { //esta interfaz es genérica, lo que signifi
 export const getAll = async (
   page = 0, //Valores por defecto
   size = 10,
+  filters: AdminPreguntaVFFilters = {},
 ): Promise<PagedResponse<IPreguntaVF>> => { //Promise: objeto que representa un valor futuro, en este caso la respuesta de la petición HTTP. En este caso, indica que la función devuelve una promesa que se resolverá con un objeto de tipo PagedResponse que contiene elementos de tipo IPreguntaVF.
-  const resp = await api.get("", { params: { page, size } }); //El segundo argumento de api.get es un objeto de configuración donde se pueden pasar parámetros de consulta (query params) a través de la propiedad params. Axios construye la UTL automáticamente.
-  return resp.data;
+  return adminPreguntaService.listQuestions({
+    ...filters,
+    tipo: 'VERDADERO_FALSO',
+    page,
+    size,
+  }) as Promise<PagedResponse<IPreguntaVF>>;
+};
+
+export const search = async (
+  texto: string,
+  page = 0,
+  size = 10,
+  filters: AdminPreguntaVFFilters = {},
+): Promise<PagedResponse<IPreguntaVF>> => {
+  return adminPreguntaService.searchQuestions(texto, {
+    ...filters,
+    tipo: 'VERDADERO_FALSO',
+    page,
+    size,
+  }) as Promise<PagedResponse<IPreguntaVF>>;
 };
 
 // GET por ID
 export const getById = async (id: number): Promise<IPreguntaVF> => {
-  const resp = await api.get(`/${id}`);
-  return resp.data;
+  return adminPreguntaService.getQuestionDetail(id) as Promise<IPreguntaVF>;
 };
 
 // POST crear
@@ -73,20 +94,19 @@ export const update = async (
 
 // DELETE lógico (desactivar)
 export const desactivar = async (id: number): Promise<IPreguntaVF> => {
-  const resp = await api.delete(`/${id}`);
-  return resp.data;
+  return adminPreguntaService.deactivateQuestion(id) as Promise<IPreguntaVF>;
 };
 
 // PUT activar
 export const activar = async (id: number): Promise<IPreguntaVF> => {
-  const resp = await api.put(`/activar/${id}`);
-  return resp.data;
+  return adminPreguntaService.activateQuestion(id) as Promise<IPreguntaVF>;
 };
 
 //Creamos un objeto para exportar todos los métodos juntos y que se pueda usar en el componente IPreguntaVFService.getAll()
 
 const preguntaVFService = {
   getAll,
+  search,
   getById,
   create,
   update,

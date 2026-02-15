@@ -1,4 +1,5 @@
 import { apiFor } from './apiClient';
+import adminPreguntaService, { type AdminListFilters } from './adminPreguntaService';
 
 const API_PATH = '/api/preguntas/unica';
 const api = apiFor(API_PATH);
@@ -23,19 +24,39 @@ export interface PagedResponse<T> {
   number?: number;
 }
 
+export interface AdminPreguntaUnicaFilters extends Omit<AdminListFilters, 'tipo'> {}
+
 // GET paginado Petición real: GET http://localhost:8080/api/preguntas/unica?page=0&size=10
 export const getAll = async (
   page = 0,
   size = 10,
+  filters: AdminPreguntaUnicaFilters = {},
 ): Promise<PagedResponse<IPreguntaUnica>> => {
-  const resp = await api.get("", { params: { page, size } });
-  return resp.data;
+  return adminPreguntaService.listQuestions({
+    ...filters,
+    tipo: 'UNICA',
+    page,
+    size,
+  }) as Promise<PagedResponse<IPreguntaUnica>>;
+};
+
+export const search = async (
+  texto: string,
+  page = 0,
+  size = 10,
+  filters: AdminPreguntaUnicaFilters = {},
+): Promise<PagedResponse<IPreguntaUnica>> => {
+  return adminPreguntaService.searchQuestions(texto, {
+    ...filters,
+    tipo: 'UNICA',
+    page,
+    size,
+  }) as Promise<PagedResponse<IPreguntaUnica>>;
 };
 
 // GET por ID
 export const getById = async (id: number): Promise<IPreguntaUnica> => {
-  const resp = await api.get(`/${id}`);
-  return resp.data;
+  return adminPreguntaService.getQuestionDetail(id) as Promise<IPreguntaUnica>;
 };
 
 // POST crear
@@ -60,18 +81,17 @@ export const update = async (
 
 // DELETE lógico (desactivar)
 export const desactivar = async (id: number): Promise<IPreguntaUnica> => {
-  const resp = await api.delete(`/${id}`);
-  return resp.data;
+  return adminPreguntaService.deactivateQuestion(id) as Promise<IPreguntaUnica>;
 };
 
 // PUT activar
 export const activar = async (id: number): Promise<IPreguntaUnica> => {
-  const resp = await api.put(`/activar/${id}`);
-  return resp.data;
+  return adminPreguntaService.activateQuestion(id) as Promise<IPreguntaUnica>;
 };
 
 const preguntaUnicaService = {
   getAll,
+  search,
   getById,
   create,
   update,

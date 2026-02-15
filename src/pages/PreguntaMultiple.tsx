@@ -3,9 +3,27 @@ import preguntaMultipleService, {
   type IPreguntaMultiple,
 } from "../services/PreguntaMultipleService";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const SORT_OPTIONS = [
+  { value: "fechaCreacion,desc", label: "Más recientes" },
+  { value: "fechaCreacion,asc", label: "Más antiguas" },
+  { value: "enunciado,asc", label: "Enunciado A-Z" },
+  { value: "enunciado,desc", label: "Enunciado Z-A" },
+];
+
+type EstadoFiltro = "TODAS" | "ACTIVAS" | "INACTIVAS";
+
 const PreguntaMultiple = () => {
   const [preguntas, setPreguntas] = useState<IPreguntaMultiple[]>([]);
   const [cargando, setCargando] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [size, setSize] = useState(10);
+  const [sort, setSort] = useState("fechaCreacion,desc");
+  const [filtroTematica, setFiltroTematica] = useState("");
+  const [filtroActiva, setFiltroActiva] = useState<EstadoFiltro>("TODAS");
+  const [textoBusquedaInput, setTextoBusquedaInput] = useState("");
+  const [textoBusqueda, setTextoBusqueda] = useState("");
 
   // Estado del formulario de creación/edición
   const [enunciado, setEnunciado] = useState("");
@@ -24,11 +42,28 @@ const PreguntaMultiple = () => {
   const [detallesPregunta, setDetallesPregunta] = useState<IPreguntaMultiple | null>(null);
   const [cargandoDetalles, setCargandoDetalles] = useState(false);
 
-  const cargarPreguntas = async () => {
+  const mapFiltroActiva = () => {
+    if (filtroActiva === "ACTIVAS") return true;
+    if (filtroActiva === "INACTIVAS") return false;
+    return undefined;
+  };
+
+  const cargarPreguntas = async (targetPage = page, targetSize = size, targetTextoBusqueda = textoBusqueda) => {
     setCargando(true);
     try {
-      const resp = await preguntaMultipleService.getAll(0, 10);
+      const filtros = {
+        tematica: filtroTematica.trim() || undefined,
+        activa: mapFiltroActiva(),
+        sort,
+      };
+
+      const resp = targetTextoBusqueda.trim()
+        ? await preguntaMultipleService.search(targetTextoBusqueda.trim(), targetPage, targetSize, filtros)
+        : await preguntaMultipleService.getAll(targetPage, targetSize, filtros);
+
       setPreguntas(resp.content);
+      setPage(typeof resp.number === "number" ? resp.number : targetPage);
+      setTotalPages(typeof resp.totalPages === "number" ? resp.totalPages : 0);
     } catch (error) {
       console.error("Error cargando preguntas", error);
     } finally {
@@ -46,7 +81,7 @@ const PreguntaMultiple = () => {
         await preguntaMultipleService.activar(p.id);
       }
 
-      cargarPreguntas();
+      cargarPreguntas(page, size);
     } catch (error) {
       console.error("Error cambiando estado", error);
     }
@@ -159,7 +194,7 @@ const PreguntaMultiple = () => {
       }
 
       limpiarFormulario();
-      cargarPreguntas();
+      cargarPreguntas(page, size);
     } catch (error) {
       console.error("Error guardando pregunta", error);
       alert(`Error ${editingId !== null ? "actualizando" : "creando"} la pregunta`);
@@ -194,8 +229,31 @@ const PreguntaMultiple = () => {
   }, [detallesId]);
 
   useEffect(() => {
-    cargarPreguntas();
+    cargarPreguntas(0, size);
   }, []);
+
+  const aplicarFiltros = () => {
+    setPage(0);
+    cargarPreguntas(0, size);
+  };
+
+  const aplicarBusqueda = () => {
+    const nextBusqueda = textoBusquedaInput;
+    setTextoBusqueda(nextBusqueda);
+    setPage(0);
+    cargarPreguntas(0, size, nextBusqueda);
+  };
+
+  const limpiarBusqueda = () => {
+    setTextoBusquedaInput("");
+    setTextoBusqueda("");
+    setPage(0);
+    cargarPreguntas(0, size, "");
+  };
+
+  const isFirstPage = page <= 0;
+  const hasData = preguntas.length > 0;
+  const isLastPage = totalPages > 0 ? page >= totalPages - 1 : !hasData;
 
   return (
     <div>
@@ -325,7 +383,59 @@ const PreguntaMultiple = () => {
       </section>
 
       {/* Lista de preguntas */}
-      <button onClick={cargarPreguntas}>Recargar preguntas</button>
+      <section style={{ border: "1px solid #ccc", padding: "15px", marginBottom: "10px" }}>
+        <h3>Filtros de listado</h3>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+          <input
+            type="text"
+            value={filtroTematica}
+            onChange={(e) => setFiltroTematica(e.target.value)}
+            placeholder="Filtrar por temática"
+          />
+          <select
+            value={filtroActiva}
+            onChange={(e) => setFiltroActiva(e.target.value as EstadoFiltro)}
+          >
+            <option value="TODAS">Todas</option>
+            <option value="ACTIVAS">Activas</option>
+            <option value="INACTIVAS">Inactivas</option>
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <select
+            value={size}
+            onChange={(e) => {
+              const nextSize = Number(e.target.value);
+              setSize(nextSize);
+              setPage(0);
+              cargarPreguntas(0, nextSize);
+            }}
+          >
+            {PAGE_SIZE_OPTIONS.map((option) => (
+              <option key={option} value={option}>{option} por página</option>
+            ))}
+          </select>
+          <button type="button" onClick={aplicarFiltros}>Aplicar filtros</button>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <input
+            type="text"
+            value={textoBusquedaInput}
+            onChange={(e) => setTextoBusquedaInput(e.target.value)}
+            placeholder="Buscar texto en preguntas"
+          />
+          <button type="button" onClick={aplicarBusqueda}>Buscar</button>
+          <button type="button" onClick={limpiarBusqueda}>Limpiar búsqueda</button>
+          <button type="button" onClick={() => cargarPreguntas(page, size)}>Recargar</button>
+        </div>
+      </section>
 
       {cargando && <p>Cargando...</p>}
 
@@ -364,6 +474,27 @@ const PreguntaMultiple = () => {
           </li>
         ))}
       </ul>
+
+      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "10px" }}>
+        <button
+          type="button"
+          onClick={() => cargarPreguntas(page - 1, size)}
+          disabled={cargando || isFirstPage}
+        >
+          Anterior
+        </button>
+        <span>
+          Página {page + 1}
+          {totalPages > 0 ? ` de ${totalPages}` : ""}
+        </span>
+        <button
+          type="button"
+          onClick={() => cargarPreguntas(page + 1, size)}
+          disabled={cargando || isLastPage}
+        >
+          Siguiente
+        </button>
+      </div>
 
       {/* Modal de detalles */}
       {detallesId !== null && detallesPregunta && (
