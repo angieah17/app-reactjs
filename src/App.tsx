@@ -4,6 +4,9 @@ import RegisterPage from './components/auth/RegisterPage'
 import PreguntaMultiple from './pages/PreguntaMultiple'
 import PreguntaUnica from './pages/PreguntaUnica'
 import PreguntaVF from './pages/PreguntaVF'
+import TestGeneratePage from './pages/TestGeneratePage'
+import TestPlayPage from './pages/TestPlayPage'
+import TestResultsPage from './pages/TestResultsPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
 import { AuthProvider } from './context/AuthContext'
@@ -20,12 +23,31 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <>
-                <h1>Inicio (componentes de prueba)</h1>
-                <PreguntaVF />
-                <PreguntaUnica />
-                <PreguntaMultiple />
-              </>
+              <TestGeneratePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tests/generar"
+          element={
+            <ProtectedRoute>
+              <TestGeneratePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tests/play"
+          element={
+            <ProtectedRoute>
+              <TestPlayPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tests/resultados"
+          element={
+            <ProtectedRoute>
+              <TestResultsPage />
             </ProtectedRoute>
           }
         />
@@ -45,7 +67,12 @@ function App() {
           path="/mis-preguntas"
           element={
             <ProtectedRoute>
-              <h2>Mis Preguntas (usuario)</h2>
+              <>
+                <h2>Mis Preguntas (usuario)</h2>
+                <PreguntaVF />
+                <PreguntaUnica />
+                <PreguntaMultiple />
+              </>
             </ProtectedRoute>
           }
         />

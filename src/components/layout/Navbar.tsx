@@ -33,6 +33,7 @@ export default function Navbar() {
     <header style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 1rem', borderBottom: '1px solid #ddd'}}>
       <nav style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
         <Link to="/">Inicio</Link>
+        {isAuthenticated && <Link to="/tests/generar">Generar Test</Link>}
         {isAuthenticated && isAdmin && <Link to="/admin">Admin</Link>}
         {isAuthenticated && !isAdmin && <Link to="/mis-preguntas">Mis Preguntas</Link>}
         {!isAuthenticated && <Link to="/register">Register</Link>}
