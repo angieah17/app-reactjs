@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import testService, { type TestFilters, type TipoPregunta } from '../services/testService'
 import { getBackendErrorMessage } from '../services/apiClient'
 
@@ -7,11 +8,25 @@ type TipoPreguntaOption = TipoPregunta | ''
 
 export default function TestGeneratePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [tematica, setTematica] = useState('')
   const [tipoPregunta, setTipoPregunta] = useState<TipoPreguntaOption>('')
   const [limite, setLimite] = useState('10')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const locationState = (location.state as { forbidden?: boolean; message?: string } | null) ?? null
+  const [accessMessage, setAccessMessage] = useState<string | null>(
+    locationState?.forbidden
+      ? locationState.message || 'No tienes permisos para acceder a esa sección.'
+      : null,
+  )
+
+  useEffect(() => {
+    if (!locationState?.forbidden) return
+    setAccessMessage(locationState.message || 'No tienes permisos para acceder a esa sección.')
+    navigate(location.pathname, { replace: true })
+  }, [location.pathname, locationState?.forbidden, locationState?.message, navigate])
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -89,6 +104,7 @@ export default function TestGeneratePage() {
           {loading ? 'Generando...' : 'Generar y jugar'}
         </button>
 
+        {accessMessage && <p style={{ color: '#b45309', margin: 0 }}>{accessMessage}</p>}
         {error && <p style={{ color: 'crimson', margin: 0 }}>{error}</p>}
       </div>
     </section>

@@ -45,7 +45,13 @@ export default function ProtectedRoute({
     )
 
     if (!isAuthorized) {
-      return <Navigate to={unauthorizedRedirectTo} replace />
+      return (
+        <Navigate
+          to={unauthorizedRedirectTo}
+          state={{ forbidden: true, message: 'No tienes permisos para acceder al área de administración.' }}
+          replace
+        />
+      )
     }
   }
 
