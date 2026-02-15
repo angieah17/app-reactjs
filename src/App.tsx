@@ -5,6 +5,7 @@ import PreguntaMultiple from './pages/PreguntaMultiple'
 import PreguntaUnica from './pages/PreguntaUnica'
 import PreguntaVF from './pages/PreguntaVF'
 import TestGeneratePage from './pages/TestGeneratePage'
+import TestHistoryPage from './pages/TestHistoryPage'
 import TestPlayPage from './pages/TestPlayPage'
 import TestResultsPage from './pages/TestResultsPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -48,6 +49,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TestResultsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tests/historial"
+          element={
+            <ProtectedRoute>
+              <TestHistoryPage />
             </ProtectedRoute>
           }
         />
