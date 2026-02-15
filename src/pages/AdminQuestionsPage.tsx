@@ -227,14 +227,17 @@ export default function AdminQuestionsPage() {
       enunciado: formState.enunciado.trim(),
       tematica: formState.tematica.trim(),
       explicacion: formState.explicacion.trim() || null,
-      activa: formState.activa,
     };
+
+    const withActiva = formMode === 'create'
+      ? { ...base, activa: formState.activa }
+      : base;
 
     if (formState.tipoPregunta === 'VERDADERO_FALSO') {
       return {
         tipo: 'VERDADERO_FALSO',
         payload: {
-          ...base,
+          ...withActiva,
           respuestaCorrecta: formState.respuestaCorrectaVF,
         },
       };
@@ -244,7 +247,7 @@ export default function AdminQuestionsPage() {
       return {
         tipo: 'UNICA',
         payload: {
-          ...base,
+          ...withActiva,
           opciones: formState.opciones.map((item) => item.trim()),
           respuestaCorrecta: formState.respuestaCorrectaUnica,
         },
@@ -254,7 +257,7 @@ export default function AdminQuestionsPage() {
     return {
       tipo: 'MULTIPLE',
       payload: {
-        ...base,
+        ...withActiva,
         opciones: formState.opciones.map((item) => item.trim()),
         respuestasCorrectas: [...formState.respuestasCorrectasMultiple].sort((a, b) => a - b),
       },
@@ -425,16 +428,18 @@ export default function AdminQuestionsPage() {
             />
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={formState.activa}
-                onChange={(event) => setFormState((current) => ({ ...current, activa: event.target.checked }))}
-              />
-              {' '}Activa
-            </label>
-          </div>
+          {formMode === 'create' && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={formState.activa}
+                  onChange={(event) => setFormState((current) => ({ ...current, activa: event.target.checked }))}
+                />
+                {' '}Activa
+              </label>
+            </div>
+          )}
 
           {formState.tipoPregunta === 'VERDADERO_FALSO' && (
             <div style={{ marginBottom: '0.75rem' }}>
