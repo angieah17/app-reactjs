@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import testService, { type TestFilters, type TipoPregunta } from '../services/testService'
+import { getBackendErrorMessage } from '../services/apiClient'
 
 type TipoPreguntaOption = TipoPregunta | ''
 
@@ -34,7 +35,7 @@ export default function TestGeneratePage() {
       })
     } catch (err) {
       console.error('Error generando test', err)
-      setError('No se pudo generar el test. Intenta nuevamente.')
+      setError(getBackendErrorMessage(err, 'No se pudo generar el test. Intenta nuevamente.'))
     } finally {
       setLoading(false)
     }

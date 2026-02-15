@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { getBackendErrorMessage } from '../services/apiClient'
 import testService, { type TestHistorialDTO } from '../services/testService'
 
 const PAGE_SIZE = 10
@@ -14,20 +15,7 @@ function formatDate(dateValue: string): string {
 }
 
 function extractErrorMessage(error: unknown): string {
-  if (typeof error === 'object' && error !== null) {
-    const maybeResponse = (error as { response?: { data?: unknown } }).response
-    const data = maybeResponse?.data
-
-    if (typeof data === 'string' && data.trim()) {
-      return data
-    }
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message
-  }
-
-  return 'No se pudo cargar el historial. Intenta nuevamente.'
+  return getBackendErrorMessage(error, 'No se pudo cargar el historial. Intenta nuevamente.')
 }
 
 export default function TestHistoryPage() {

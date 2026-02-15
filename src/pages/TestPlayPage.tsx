@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getBackendErrorMessage } from '../services/apiClient'
 import testService, {
   type RespuestaDTO,
   type TestFilters,
@@ -93,7 +94,7 @@ export default function TestPlayPage() {
       })
     } catch (err) {
       console.error('Error enviando test', err)
-      setError('No se pudo enviar el test. Intenta nuevamente.')
+      setError(getBackendErrorMessage(err, 'No se pudo enviar el test. Intenta nuevamente.'))
     } finally {
       setSubmitting(false)
     }
