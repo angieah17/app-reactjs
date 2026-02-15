@@ -36,7 +36,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
               <h2>Panel Admin (acceso restringido)</h2>
             </ProtectedRoute>
           }
