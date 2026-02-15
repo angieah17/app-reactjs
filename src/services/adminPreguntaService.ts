@@ -30,8 +30,6 @@ export interface AdminListFilters {
   tematica?: string;
   tipo?: TipoPreguntaAdmin;
   activa?: boolean;
-  page?: number;
-  size?: number;
   sort?: string | string[];
 }
 
@@ -46,10 +44,57 @@ function withSort<T extends Record<string, unknown>>(params: T, sort?: string | 
   };
 }
 
+type TipoPath = 'verdadero-falso' | 'unica' | 'multiple';
+
+function toTipoPath(tipo: TipoPreguntaAdmin): TipoPath {
+  switch (tipo) {
+    case 'VERDADERO_FALSO':
+      return 'verdadero-falso';
+    case 'UNICA':
+      return 'unica';
+    case 'MULTIPLE':
+      return 'multiple';
+    default:
+      return 'unica';
+  }
+}
+
+export interface AdminVFPayload {
+  enunciado: string;
+  tematica: string;
+  explicacion?: string | null;
+  activa?: boolean;
+  respuestaCorrecta: boolean;
+}
+
+export interface AdminUnicaPayload {
+  enunciado: string;
+  tematica: string;
+  explicacion?: string | null;
+  activa?: boolean;
+  opciones: string[];
+  respuestaCorrecta: number;
+}
+
+export interface AdminMultiplePayload {
+  enunciado: string;
+  tematica: string;
+  explicacion?: string | null;
+  activa?: boolean;
+  opciones: string[];
+  respuestasCorrectas: number[];
+}
+
+export type AdminCreatePayload = AdminVFPayload | AdminUnicaPayload | AdminMultiplePayload;
+export type AdminUpdatePayload = Partial<AdminVFPayload> | Partial<AdminUnicaPayload> | Partial<AdminMultiplePayload>;
+
 export const listQuestions = async (
   filters: AdminListFilters = {},
+  page = 0,
+  size = 10,
+  sort: string | string[] = 'fechaCreacion,desc',
 ): Promise<AdminPagedResponse<AdminPregunta>> => {
-  const { tematica, tipo, activa, page, size, sort } = filters;
+  const { tematica, tipo, activa } = filters;
   const resp = await api.get('', {
     params: withSort({ tematica, tipo, activa, page, size }, sort),
   });
@@ -59,18 +104,23 @@ export const listQuestions = async (
 export const searchQuestions = async (
   texto: string,
   filters: AdminListFilters = {},
+  page = 0,
+  size = 10,
+  sort: string | string[] = 'fechaCreacion,desc',
 ): Promise<AdminPagedResponse<AdminPregunta>> => {
-  const { tematica, tipo, activa, page, size, sort } = filters;
+  const { tematica, tipo, activa } = filters;
   const resp = await api.get('/buscar', {
     params: withSort({ texto, tematica, tipo, activa, page, size }, sort),
   });
   return resp.data;
 };
 
-export const getQuestionDetail = async (id: number): Promise<AdminPregunta> => {
+export const getQuestionById = async (id: number): Promise<AdminPregunta> => {
   const resp = await api.get(`/${id}`);
   return resp.data;
 };
+
+export const getQuestionDetail = getQuestionById;
 
 export const activateQuestion = async (id: number): Promise<AdminPregunta> => {
   const resp = await api.patch(`/${id}/activar`);
@@ -82,21 +132,43 @@ export const deactivateQuestion = async (id: number): Promise<AdminPregunta> => 
   return resp.data;
 };
 
-export const toggleQuestion = async (id: number, activa: boolean): Promise<AdminPregunta> => {
-  if (activa) {
+export const toggleQuestion = async (id: number, activaActual: boolean): Promise<AdminPregunta> => {
+  if (activaActual) {
     return deactivateQuestion(id);
   }
 
   return activateQuestion(id);
 };
 
+export const createQuestion = async (
+  tipoPregunta: TipoPreguntaAdmin,
+  payload: AdminCreatePayload,
+): Promise<AdminPregunta> => {
+  const path = toTipoPath(tipoPregunta);
+  const resp = await api.post(`/${path}`, payload);
+  return resp.data;
+};
+
+export const updateQuestion = async (
+  tipoPregunta: TipoPreguntaAdmin,
+  id: number,
+  payload: AdminUpdatePayload,
+): Promise<AdminPregunta> => {
+  const path = toTipoPath(tipoPregunta);
+  const resp = await api.put(`/${path}/${id}`, payload);
+  return resp.data;
+};
+
 const adminPreguntaService = {
   listQuestions,
   searchQuestions,
+  getQuestionById,
   getQuestionDetail,
   activateQuestion,
   deactivateQuestion,
   toggleQuestion,
+  createQuestion,
+  updateQuestion,
 };
 
 export default adminPreguntaService;
