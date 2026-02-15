@@ -1,7 +1,7 @@
 import { apiFor } from './apiClient';
 import adminPreguntaService, { type AdminListFilters } from './adminPreguntaService';
 
-const API_PATH = '/api/preguntas/unica';
+const API_PATH = '/api/admin/preguntas/unica';
 const api = apiFor(API_PATH);
 
 export interface IPreguntaUnica {
