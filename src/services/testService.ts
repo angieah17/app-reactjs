@@ -158,7 +158,7 @@ export const getTestHistory = async (
   page = 0,
   pageSize = 10,
 ): Promise<PageResponse<TestHistorialDTO>> => {
-  const resp = await api.get('/historial', { params: { page, pageSize } });
+  const resp = await api.get('/historial', { params: { page, pageSize, size: pageSize } });
   return resp.data;
 };
 
