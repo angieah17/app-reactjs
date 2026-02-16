@@ -20,7 +20,7 @@ export default function Navbar() {
   const location = useLocation()
 
   if (isLoading) return null
-  if (location.pathname === '/') return null
+  if (['/', '/login', '/register'].includes(location.pathname)) return null
 
   const username = getUsername(user)
   const roles = getRoles(user)
