@@ -8,35 +8,10 @@ import TestGeneratePage from './pages/TestGeneratePage'
 import TestHistoryPage from './pages/TestHistoryPage'
 import TestPlayPage from './pages/TestPlayPage'
 import TestResultsPage from './pages/TestResultsPage'
+import WelcomePage from './pages/WelcomePage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
 import { AuthProvider } from './context/AuthContext'
-import { useAuth } from './context/AuthContext'
-
-function getRoles(user: any): string[] {
-  if (!user) return []
-  if (Array.isArray(user.roles)) {
-    return user.roles.map((role: any) => role?.authority || role?.name || String(role))
-  }
-  if (Array.isArray(user.authorities)) {
-    return user.authorities.map((role: any) => role?.authority || role?.name || String(role))
-  }
-  if (user.roles) return [String(user.roles)]
-  if (user.role) return [String(user.role)]
-  if (user.authority) return [String(user.authority)]
-  return []
-}
-
-function HomeRoute() {
-  const { user, isAuthenticated, isLoading } = useAuth()
-
-  if (isLoading) return null
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-
-  const roles = getRoles(user)
-  const isAdmin = roles.some((role) => String(role).toUpperCase().includes('ADMIN'))
-  return <Navigate to={isAdmin ? '/admin' : '/mis-preguntas'} replace />
-}
 
 function App() {
   return (
@@ -45,7 +20,7 @@ function App() {
         <Navbar />
 
         <Routes>
-        <Route path="/" element={<HomeRoute />} />
+        <Route path="/" element={<WelcomePage />} />
         <Route
           path="/tests/generar"
           element={

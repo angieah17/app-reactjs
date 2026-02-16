@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 
@@ -17,8 +17,10 @@ function getRoles(user: any): string[] {
 export default function Navbar() {
   const { user, isAuthenticated, logout, isLoading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   if (isLoading) return null
+  if (['/', '/login', '/register'].includes(location.pathname)) return null
 
   const username = getUsername(user)
   const roles = getRoles(user)
