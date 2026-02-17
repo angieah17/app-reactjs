@@ -40,6 +40,7 @@ export default function Navbar() {
         {isAuthenticated && <Link to="/mis-preguntas">Mis Tests</Link>}
         {isAuthenticated && <Link to="/tests/historial">Historial</Link>}
         {isAuthenticated && isAdmin && <Link to="/admin">Admin</Link>}
+        {isAuthenticated && isAdmin && <Link to="/admin/preguntas/upload">Subir CSV</Link>}
         {isAuthenticated && isAdmin && <Link to="/admin/usuarios">Admin Usuarios</Link>}
       </nav>
 
