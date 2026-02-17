@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, useState } from 'react';
+import { type ChangeEvent, useState } from 'react';
 import adminPreguntaUploadService from '../services/adminPreguntaUploadService';
 
 export default function AdminUploadCsvPage() {
@@ -14,31 +14,31 @@ export default function AdminUploadCsvPage() {
     setErrorMessage(null);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedFile) {
-      return;
-    }
-
-    setIsUploading(true);
-    setSuccessMessage(null);
-    setErrorMessage(null);
-
-    try {
-      const total = await adminPreguntaUploadService.uploadPreguntasCsv(selectedFile);
-      setSuccessMessage(`Se importaron ${total} preguntas`);
-    } catch {
-      setErrorMessage('No se pudo importar el archivo');
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   return (
     <main>
       <h1>Subir preguntas CSV</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (!selectedFile) {
+            return;
+          }
+
+          setIsUploading(true);
+          setSuccessMessage(null);
+          setErrorMessage(null);
+
+          try {
+            const total = await adminPreguntaUploadService.uploadPreguntasCsv(selectedFile);
+            setSuccessMessage(`Se importaron ${total} preguntas`);
+          } catch {
+            setErrorMessage('No se pudo importar el archivo');
+          } finally {
+            setIsUploading(false);
+          }
+        }}
+      >
         <label htmlFor="csv-file">Archivo CSV</label>
         <input
           id="csv-file"
