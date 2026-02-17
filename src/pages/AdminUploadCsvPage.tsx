@@ -1,6 +1,5 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react';
 import adminPreguntaUploadService from '../services/adminPreguntaUploadService';
-import './AdminUploadCsvPage.css';
 
 export default function AdminUploadCsvPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -36,10 +35,10 @@ export default function AdminUploadCsvPage() {
   };
 
   return (
-    <main className="csv-upload-page">
+    <main>
       <h1>Subir preguntas CSV</h1>
 
-      <form className="csv-upload-form" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="csv-file">Archivo CSV</label>
         <input
           id="csv-file"
@@ -54,10 +53,10 @@ export default function AdminUploadCsvPage() {
         </button>
       </form>
 
-      {successMessage && <p className="status-success">{successMessage}</p>}
-      {errorMessage && <p className="status-error">{errorMessage}</p>}
+      {successMessage && <p>{successMessage}</p>}
+      {errorMessage && <p>{errorMessage}</p>}
 
-      <section className="csv-help">
+      <section>
         <h2>Formato CSV</h2>
         <p>Cabecera obligatoria y separador ;</p>
         <pre>
