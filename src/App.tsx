@@ -4,6 +4,7 @@ import RegisterPage from './components/auth/RegisterPage'
 import AdminQuestionsPage from './pages/AdminQuestionsPage'
 import AdminQuestionDetailPage from './pages/AdminQuestionDetailPage'
 import AdminUsuariosPage from './pages/AdminUsuariosPage'
+import AdminUploadCsvPage from './pages/AdminUploadCsvPage'
 import TestGeneratePage from './pages/TestGeneratePage'
 import TestHistoryPage from './pages/TestHistoryPage'
 import TestPlayPage from './pages/TestPlayPage'
@@ -77,6 +78,14 @@ function App() {
           element={
             <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
               <AdminUsuariosPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/preguntas/upload"
+          element={
+            <ProtectedRoute requiredRoles={['ADMIN']} unauthorizedRedirectTo="/mis-preguntas">
+              <AdminUploadCsvPage />
             </ProtectedRoute>
           }
         />
