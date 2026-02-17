@@ -360,25 +360,23 @@ export default function AdminQuestionsPage() {
   };
 
   return (
-    <section style={{ padding: '1rem' }}>
+    <section>
       <h1>Administración de preguntas</h1>
 
-      <section style={{ border: '1px solid #ddd', padding: '1rem', marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>{formMode === 'edit' ? 'Actualizar pregunta' : 'Crear nueva pregunta'}</h2>
+      <section className="card p-3 mb-3">
+        <h2 className="h4">{formMode === 'edit' ? 'Actualizar pregunta' : 'Crear nueva pregunta'}</h2>
 
-        {formMode === 'edit' && editingQuestionId !== null && (
-          <p style={{ marginTop: 0 }}>Editando pregunta ID: {editingQuestionId}</p>
-        )}
+        {formMode === 'edit' && editingQuestionId !== null && (<p>Editando pregunta ID: {editingQuestionId}</p>)}
 
-        {formError && <p style={{ color: '#b00020' }}>{formError}</p>}
-        {feedback && <p style={{ color: '#006600' }}>{feedback}</p>}
+        {formError && <div className="alert alert-danger">{formError}</div>}
+        {feedback && <div className="alert alert-success">{feedback}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label htmlFor="tipoPregunta"><strong>Tipo *</strong></label>
-            <br />
+          <div className="mb-3">
+            <label htmlFor="tipoPregunta" className="form-label"><strong>Tipo *</strong></label>
             <select
               id="tipoPregunta"
+              className="form-select"
               value={formState.tipoPregunta}
               onChange={(event) => setFormState((current) => ({ ...current, tipoPregunta: event.target.value as TipoPreguntaAdmin }))}
               disabled={formMode === 'edit'}
@@ -387,166 +385,174 @@ export default function AdminQuestionsPage() {
               <option value="UNICA">UNICA</option>
               <option value="MULTIPLE">MULTIPLE</option>
             </select>
-            {formMode === 'edit' && <small style={{ marginLeft: '0.5rem' }}>El tipo no se cambia durante la edición.</small>}
+            {formMode === 'edit' && <small className="ms-2">El tipo no se cambia durante la edición.</small>}
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label htmlFor="enunciado"><strong>Enunciado *</strong></label>
-            <br />
+          <div className="mb-3">
+            <label htmlFor="enunciado" className="form-label"><strong>Enunciado *</strong></label>
             <textarea
               id="enunciado"
+              className="form-control"
               value={formState.enunciado}
               onChange={(event) => setFormState((current) => ({ ...current, enunciado: event.target.value }))}
               rows={3}
-              style={{ width: '100%' }}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label htmlFor="tematica"><strong>Temática *</strong></label>
-            <br />
+          <div className="mb-3">
+            <label htmlFor="tematica" className="form-label"><strong>Temática *</strong></label>
             <input
               id="tematica"
               type="text"
+              className="form-control"
               value={formState.tematica}
               onChange={(event) => setFormState((current) => ({ ...current, tematica: event.target.value }))}
-              style={{ width: '100%' }}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label htmlFor="explicacion">Explicación</label>
-            <br />
+          <div className="mb-3">
+            <label htmlFor="explicacion" className="form-label">Explicación</label>
             <textarea
               id="explicacion"
+              className="form-control"
               value={formState.explicacion}
               onChange={(event) => setFormState((current) => ({ ...current, explicacion: event.target.value }))}
               rows={2}
-              style={{ width: '100%' }}
             />
           </div>
 
           {formMode === 'create' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <label>
+            <div className="mb-3 form-check">
                 <input
                   type="checkbox"
+                  className="form-check-input"
+                  id="preguntaActiva"
                   checked={formState.activa}
                   onChange={(event) => setFormState((current) => ({ ...current, activa: event.target.checked }))}
                 />
-                {' '}Activa
-              </label>
+              <label htmlFor="preguntaActiva" className="form-check-label">Activa</label>
             </div>
           )}
 
           {formState.tipoPregunta === 'VERDADERO_FALSO' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <strong>Respuesta correcta *</strong>
-              <br />
-              <label>
+            <div className="mb-3">
+              <strong className="d-block mb-2">Respuesta correcta *</strong>
+              <label className="form-check-label me-3">
                 <input
                   type="radio"
+                  className="form-check-input me-1"
                   name="respuesta-vf"
                   checked={formState.respuestaCorrectaVF}
                   onChange={() => setFormState((current) => ({ ...current, respuestaCorrectaVF: true }))}
                 />
-                {' '}Verdadero
+                Verdadero
               </label>
-              <label style={{ marginLeft: '1rem' }}>
+              <label className="form-check-label">
                 <input
                   type="radio"
+                  className="form-check-input me-1"
                   name="respuesta-vf"
                   checked={!formState.respuestaCorrectaVF}
                   onChange={() => setFormState((current) => ({ ...current, respuestaCorrectaVF: false }))}
                 />
-                {' '}Falso
+                Falso
               </label>
             </div>
           )}
 
           {(formState.tipoPregunta === 'UNICA' || formState.tipoPregunta === 'MULTIPLE') && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <strong>Opciones *</strong>
+            <div className="mb-3">
+              <strong className="d-block mb-2">Opciones *</strong>
               {formState.opciones.map((option, index) => (
-                <div key={index} style={{ marginTop: '0.5rem' }}>
+                <div key={index} className="mb-2">
                   <input
                     type="text"
+                    className="form-control"
                     value={option}
                     onChange={(event) => setOptionValue(index, event.target.value)}
                     placeholder={`Opción ${index + 1}`}
-                    style={{ width: '100%' }}
                   />
                 </div>
               ))}
-              <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                <button type="button" onClick={addOption}>Agregar opción</button>
-                <button type="button" onClick={removeLastOption} disabled={formState.opciones.length <= 3}>Quitar última</button>
+              <div className="d-flex gap-2 mt-2">
+                <button type="button" className="btn btn-secondary" onClick={addOption}>Agregar opción</button>
+                <button type="button" className="btn btn-secondary" onClick={removeLastOption} disabled={formState.opciones.length <= 3}>Quitar última</button>
               </div>
             </div>
           )}
 
           {formState.tipoPregunta === 'UNICA' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <strong>Respuesta correcta *</strong>
+            <div className="mb-3">
+              <strong className="d-block mb-2">Respuesta correcta *</strong>
               {formState.opciones.map((_, index) => (
-                <label key={index} style={{ display: 'block' }}>
+                <label key={index} className="form-check-label d-block mb-1">
                   <input
                     type="radio"
+                    className="form-check-input me-1"
                     name="respuesta-unica"
                     checked={formState.respuestaCorrectaUnica === index}
                     onChange={() => setFormState((current) => ({ ...current, respuestaCorrectaUnica: index }))}
                   />
-                  {' '}Opción {index + 1}
+                  Opción {index + 1}
                 </label>
               ))}
             </div>
           )}
 
           {formState.tipoPregunta === 'MULTIPLE' && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <strong>Respuestas correctas *</strong>
+            <div className="mb-3">
+              <strong className="d-block mb-2">Respuestas correctas *</strong>
               {formState.opciones.map((_, index) => (
-                <label key={index} style={{ display: 'block' }}>
+                <label key={index} className="form-check-label d-block mb-1">
                   <input
                     type="checkbox"
+                    className="form-check-input me-1"
                     checked={formState.respuestasCorrectasMultiple.includes(index)}
                     onChange={() => toggleCorrectAnswerMultiple(index)}
                   />
-                  {' '}Opción {index + 1}
+                  Opción {index + 1}
                 </label>
               ))}
             </div>
           )}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
             {submitting ? (formMode === 'edit' ? 'Actualizando...' : 'Creando...') : (formMode === 'edit' ? 'Actualizar pregunta' : 'Crear pregunta')}
           </button>
           {formMode === 'edit' && (
-            <button type="button" onClick={backToCreateMode} style={{ marginLeft: '0.75rem' }} disabled={submitting}>
+            <button type="button" className="btn btn-secondary ms-2" onClick={backToCreateMode} disabled={submitting}>
               Cancelar edición
             </button>
           )}
         </form>
       </section>
 
-      <section style={{ border: '1px solid #ddd', padding: '1rem', marginBottom: '1rem' }}>
-        <h2 style={{ marginTop: 0 }}>Filtros</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <section className="card p-3 mb-3">
+        <h2 className="h4">Filtros</h2>
+        <div className="row g-3 align-items-end">
+          <div className="col-md-4">
           <input
+            className="form-control"
             type="text"
             placeholder="Buscar por texto"
             value={filters.texto}
             onChange={(event) => setFilters((current) => ({ ...current, texto: event.target.value }))}
           />
+          </div>
+          <div className="col-md-4">
           <input
+            className="form-control"
             type="text"
             placeholder="Filtrar por temática"
             value={filters.tematica}
             onChange={(event) => setFilters((current) => ({ ...current, tematica: event.target.value }))}
           />
+          </div>
+          <div className="col-md-4">
           <select
+            className="form-select"
             value={filters.tipo}
             onChange={(event) => setFilters((current) => ({ ...current, tipo: event.target.value as '' | TipoPreguntaAdmin }))}
           >
@@ -555,7 +561,10 @@ export default function AdminQuestionsPage() {
             <option value="UNICA">UNICA</option>
             <option value="MULTIPLE">MULTIPLE</option>
           </select>
+          </div>
+          <div className="col-md-3">
           <select
+            className="form-select"
             value={filters.activa}
             onChange={(event) => setFilters((current) => ({ ...current, activa: event.target.value as EstadoFiltroUI }))}
           >
@@ -563,7 +572,10 @@ export default function AdminQuestionsPage() {
             <option value="ACTIVAS">Activas</option>
             <option value="INACTIVAS">Inactivas</option>
           </select>
+          </div>
+          <div className="col-md-3">
           <select
+            className="form-select"
             value={sort}
             onChange={(event) => setSort(event.target.value)}
           >
@@ -571,7 +583,10 @@ export default function AdminQuestionsPage() {
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
+          </div>
+          <div className="col-md-3">
           <select
+            className="form-select"
             value={size}
             onChange={async (event) => {
               const nextSize = Number(event.target.value);
@@ -584,45 +599,48 @@ export default function AdminQuestionsPage() {
               <option key={option} value={option}>{option} por página</option>
             ))}
           </select>
+          </div>
+          <div className="col-md-3 d-flex gap-2">
+            <button type="button" className="btn btn-primary" onClick={() => void applyFilters()}>Aplicar filtros</button>
+            <button type="button" className="btn btn-secondary" onClick={() => void resetFilters()}>Limpiar filtros</button>
+          </div>
 
-          <button type="button" onClick={() => void applyFilters()}>Aplicar filtros</button>
-          <button type="button" onClick={() => void resetFilters()}>Limpiar filtros</button>
         </div>
       </section>
 
       {loading && <p>Cargando preguntas...</p>}
-      {error && <p style={{ color: '#b00020' }}>{error}</p>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <section>
         <h2>Listado</h2>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="table table-striped table-hover align-middle">
           <thead>
             <tr>
-              <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: '0.5rem' }}>Enunciado</th>
-              <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: '0.5rem' }}>Tipo</th>
-              <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: '0.5rem' }}>Temática</th>
-              <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: '0.5rem' }}>Estado</th>
-              <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: '0.5rem' }}>Acciones</th>
+              <th>Enunciado</th>
+              <th>Tipo</th>
+              <th>Temática</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {data.content.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: '0.75rem' }}>No hay preguntas para los filtros actuales.</td>
+                <td colSpan={5}>No hay preguntas para los filtros actuales.</td>
               </tr>
             )}
             {data.content.map((question) => (
               <tr key={question.id}>
-                <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{question.enunciado}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{question.tipoPregunta}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{question.tematica}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{question.activa ? 'Activa' : 'Inactiva'}</td>
-                <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <td>{question.enunciado}</td>
+                <td>{question.tipoPregunta}</td>
+                <td>{question.tematica}</td>
+                <td>{question.activa ? 'Activa' : 'Inactiva'}</td>
+                <td className="d-flex gap-2 flex-wrap">
                   <Link to={`/admin/preguntas/${question.id}`}>Ver detalle</Link>
-                  <button type="button" onClick={() => question.id && void handleEdit(question.id)}>
+                  <button type="button" className="btn btn-warning btn-sm" onClick={() => question.id && void handleEdit(question.id)}>
                     Editar
                   </button>
-                  <button type="button" onClick={() => void handleToggle(question)}>
+                  <button type="button" className={question.activa ? 'btn btn-outline-danger btn-sm' : 'btn btn-success btn-sm'} onClick={() => void handleToggle(question)}>
                     {question.activa ? 'Desactivar' : 'Activar'}
                   </button>
                 </td>
@@ -632,10 +650,10 @@ export default function AdminQuestionsPage() {
         </table>
       </section>
 
-      <footer style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <button type="button" onClick={() => void goToPage(currentPage - 1)} disabled={loading || isFirstPage}>Anterior</button>
+      <footer className="mt-3 d-flex align-items-center gap-3 flex-wrap">
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => void goToPage(currentPage - 1)} disabled={loading || isFirstPage}>Anterior</button>
         <span>Página {currentPage + 1}{totalPages > 0 ? ` de ${totalPages}` : ''}</span>
-        <button type="button" onClick={() => void goToPage(currentPage + 1)} disabled={loading || isLastPage}>Siguiente</button>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={() => void goToPage(currentPage + 1)} disabled={loading || isLastPage}>Siguiente</button>
         <span>Total: {totalElements}</span>
       </footer>
     </section>

@@ -72,12 +72,12 @@ function LoginPage({ redirectTo, registerPath = '/register', onLoginSuccess }: L
 	}
 
 	return (
-		<section>
+		<section className="mx-auto" style={{ maxWidth: 480 }}>
 			<h1>Iniciar Sesión</h1>
 
 			<form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} noValidate>
-				<div>
-					<label htmlFor="username">Username</label>
+				<div className="mb-3">
+					<label htmlFor="username" className="form-label">Username</label>
 					<input
 						id="username"
 						name="username"
@@ -85,12 +85,13 @@ function LoginPage({ redirectTo, registerPath = '/register', onLoginSuccess }: L
 						autoComplete="username"
 										value={username}
 										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setUsername(event.target.value)}
+						className="form-control"
 						required
 					/>
 				</div>
 
-				<div>
-					<label htmlFor="password">Password</label>
+				<div className="mb-3">
+					<label htmlFor="password" className="form-label">Password</label>
 					<input
 						id="password"
 						name="password"
@@ -98,22 +99,23 @@ function LoginPage({ redirectTo, registerPath = '/register', onLoginSuccess }: L
 						autoComplete="current-password"
 										value={password}
 										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+						className="form-control"
 						required
 					/>
 				</div>
 
 				{error && (
-					<div role="alert" aria-live="polite">
+					<div className="alert alert-danger" role="alert" aria-live="polite">
 						{error}
 					</div>
 				)}
 
-				<button type="submit" disabled={isSubmitting}>
+				<button type="submit" className="btn btn-primary" disabled={isSubmitting}>
 					{isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
 				</button>
 			</form>
 
-			<p>
+			<p className="mt-3 mb-0">
 				¿No tienes cuenta? <a href={registerPath}>Regístrate</a>
 			</p>
 		</section>

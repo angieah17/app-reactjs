@@ -46,58 +46,58 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{maxWidth:480, margin:'2rem auto', padding:20, border:'1px solid #e5e7eb', borderRadius:8}}>
-      <h2 style={{marginBottom:12}}>Crear cuenta</h2>
+    <div className="mx-auto card p-4" style={{ maxWidth: 480 }}>
+      <h2 className="mb-3">Crear cuenta</h2>
 
       {error && (
-        <div style={{color:'#b91c1c', marginBottom:12}} role="alert">{error}</div>
+        <div className="alert alert-danger" role="alert">{error}</div>
       )}
 
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-        <div style={{marginBottom:8}}>
-          <label style={{display:'block', marginBottom:6}}>Usuario</label>
+        <div className="mb-3">
+          <label className="form-label">Usuario</label>
           <input
+            className="form-control"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
             minLength={3}
             autoComplete="username"
-            style={{width:'100%', padding:8, boxSizing:'border-box'}}
           />
         </div>
 
-        <div style={{marginBottom:8}}>
-          <label style={{display:'block', marginBottom:6}}>Contraseña</label>
+        <div className="mb-3">
+          <label className="form-label">Contraseña</label>
           <input
+            className="form-control"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
             minLength={6}
             autoComplete="new-password"
-            style={{width:'100%', padding:8, boxSizing:'border-box'}}
           />
         </div>
 
-        <div style={{marginBottom:12}}>
-          <label style={{display:'block', marginBottom:6}}>Confirmar contraseña</label>
+        <div className="mb-3">
+          <label className="form-label">Confirmar contraseña</label>
           <input
+            className="form-control"
             type="password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
             required
             minLength={6}
             autoComplete="new-password"
-            style={{width:'100%', padding:8, boxSizing:'border-box'}}
           />
         </div>
 
-        <button type="submit" disabled={isSubmitting} style={{padding:'8px 12px'}}>
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
           {isSubmitting ? 'Registrando...' : 'Registrarse'}
         </button>
       </form>
 
-      <p style={{marginTop:12}}>
+      <p className="mt-3 mb-0">
         ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
       </p>
     </div>

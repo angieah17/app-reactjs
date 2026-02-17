@@ -57,55 +57,55 @@ export default function TestGeneratePage() {
   }
 
   return (
-    <section style={{ padding: '1rem', maxWidth: 680 }}>
+    <section className="mx-auto" style={{ maxWidth: 680 }}>
       <h1>Generar test</h1>
 
-      <div style={{ display: 'grid', gap: '0.75rem' }}>
-        <label htmlFor="tematica">
-          Temática
+      <div>
+        <div className="mb-3">
+          <label htmlFor="tematica" className="form-label">Temática</label>
           <input
             id="tematica"
             type="text"
+            className="form-control"
             value={tematica}
             onChange={(e) => setTematica(e.target.value)}
             placeholder="Ej: Historia"
-            style={{ width: '100%', marginTop: '0.25rem' }}
           />
-        </label>
+        </div>
 
-        <label htmlFor="tipoPregunta">
-          Tipo de pregunta
+        <div className="mb-3">
+          <label htmlFor="tipoPregunta" className="form-label">Tipo de pregunta</label>
           <select
             id="tipoPregunta"
+            className="form-select"
             value={tipoPregunta}
             onChange={(e) => setTipoPregunta(e.target.value as TipoPreguntaOption)}
-            style={{ width: '100%', marginTop: '0.25rem' }}
           >
             <option value="">Todos</option>
             <option value="VERDADERO_FALSO">Verdadero/Falso</option>
             <option value="UNICA">Única</option>
             <option value="MULTIPLE">Múltiple</option>
           </select>
-        </label>
+        </div>
 
-        <label htmlFor="limite">
-          Límite de preguntas
+        <div className="mb-3">
+          <label htmlFor="limite" className="form-label">Límite de preguntas</label>
           <input
             id="limite"
             type="number"
+            className="form-control"
             min={1}
             value={limite}
             onChange={(e) => setLimite(e.target.value)}
-            style={{ width: '100%', marginTop: '0.25rem' }}
           />
-        </label>
+        </div>
 
-        <button type="button" onClick={handleGenerate} disabled={loading}>
+        <button type="button" className="btn btn-primary" onClick={handleGenerate} disabled={loading}>
           {loading ? 'Generando...' : 'Generar y jugar'}
         </button>
 
-        {accessMessage && <p style={{ color: '#b45309', margin: 0 }}>{accessMessage}</p>}
-        {error && <p style={{ color: 'crimson', margin: 0 }}>{error}</p>}
+        {accessMessage && <div className="alert alert-danger mt-3 mb-0">{accessMessage}</div>}
+        {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
       </div>
     </section>
   )
