@@ -26,37 +26,37 @@ export default function TestResultsPage() {
   }
 
   return (
-    <section style={{ padding: '1rem', maxWidth: 860 }}>
+    <section className="mx-auto" style={{ maxWidth: 860 }}>
       <h1>Resultados</h1>
 
-      <div style={{ display: 'grid', gap: '0.35rem', marginBottom: '1rem' }}>
-        <p style={{ margin: 0 }}>Puntuación (0-10): <strong>{formattedScore}</strong></p>
-        <p style={{ margin: 0 }}>Porcentaje de acierto: <strong>{formattedPercentage}%</strong></p>
-        <p style={{ margin: 0 }}>Preguntas correctas: <strong>{result.preguntasCorrectas}</strong></p>
-        <p style={{ margin: 0 }}>Preguntas incorrectas: <strong>{result.preguntasIncorrectas}</strong></p>
-        <p style={{ margin: 0 }}>Total de preguntas: <strong>{result.totalPreguntas}</strong></p>
+      <div className="card p-3 mb-3">
+        <p className="mb-1">Puntuación (0-10): <strong>{formattedScore}</strong></p>
+        <p className="mb-1">Porcentaje de acierto: <strong>{formattedPercentage}%</strong></p>
+        <p className="mb-1">Preguntas correctas: <strong>{result.preguntasCorrectas}</strong></p>
+        <p className="mb-1">Preguntas incorrectas: <strong>{result.preguntasIncorrectas}</strong></p>
+        <p className="mb-0">Total de preguntas: <strong>{result.totalPreguntas}</strong></p>
       </div>
 
       <h2>Revisión</h2>
-      <ul style={{ display: 'grid', gap: '1rem', paddingLeft: '1.25rem' }}>
+      <ul className="d-grid gap-3 ps-4">
         {result.revision.map((item) => (
-          <li key={item.preguntaId} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.75rem' }}>
-            <p style={{ margin: '0 0 0.5rem 0' }}>
+          <li key={item.preguntaId} className="card p-3">
+            <p className="mb-2">
               <strong>{item.enunciado}</strong>
             </p>
-            <p style={{ margin: '0.2rem 0' }}>Resultado: <strong>{item.esCorrecta ? 'Correcta' : 'Incorrecta'}</strong></p>
-            <p style={{ margin: '0.2rem 0' }}>Tu respuesta: {item.respuestaUsuario || 'Sin respuesta'}</p>
-            <p style={{ margin: '0.2rem 0' }}>Respuesta correcta: {item.respuestaCorrecta || 'Sin información'}</p>
-            <p style={{ margin: '0.2rem 0' }}>Explicación: {item.explicacion || 'Sin explicación disponible.'}</p>
+            <p className="mb-1">Resultado: <strong>{item.esCorrecta ? 'Correcta' : 'Incorrecta'}</strong></p>
+            <p className="mb-1">Tu respuesta: {item.respuestaUsuario || 'Sin respuesta'}</p>
+            <p className="mb-1">Respuesta correcta: {item.respuestaCorrecta || 'Sin información'}</p>
+            <p className="mb-0">Explicación: {item.explicacion || 'Sin explicación disponible.'}</p>
           </li>
         ))}
       </ul>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-        <button type="button" onClick={() => navigate('/tests/generar')}>
+      <div className="d-flex gap-2 mt-3">
+        <button type="button" className="btn btn-primary" onClick={() => navigate('/tests/generar')}>
           Nuevo test
         </button>
-        <button type="button" onClick={() => navigate('/tests/historial')}>
+        <button type="button" className="btn btn-secondary" onClick={() => navigate('/tests/historial')}>
           Ir a historial
         </button>
       </div>

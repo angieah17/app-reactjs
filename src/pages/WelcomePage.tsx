@@ -11,7 +11,7 @@ function WelcomePage() {
       <h1>Bienvenido</h1>
       <p>Accede a la plataforma y comienza tu experiencia.</p>
 
-      <button type="button" onClick={handleStart}>
+      <button type="button" className="btn btn-primary" onClick={handleStart}>
         Empezar
       </button>
     </section>

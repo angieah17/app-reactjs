@@ -36,17 +36,17 @@ export default function AdminQuestionDetailPage() {
   const showOpciones = question?.tipoPregunta === 'UNICA' || question?.tipoPregunta === 'MULTIPLE';
 
   return (
-    <section style={{ padding: '1rem' }}>
+    <section>
       <h1>Detalle de pregunta</h1>
-      <p>
+      <p className="mb-3">
         <Link to="/admin">Volver al listado</Link>
       </p>
 
       {loading && <p>Cargando detalle...</p>}
-      {error && <p style={{ color: '#b00020' }}>{error}</p>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
       {!loading && !error && question && (
-        <article style={{ border: '1px solid #ddd', padding: '1rem' }}>
+        <article className="card p-3">
           <p><strong>ID:</strong> {question.id}</p>
           <p><strong>Enunciado:</strong> {question.enunciado}</p>
           <p><strong>Tipo:</strong> {question.tipoPregunta}</p>
