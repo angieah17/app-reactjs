@@ -32,28 +32,30 @@ export default function Navbar() {
   }
 
   return (
-    <header style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 1rem', borderBottom: '1px solid #ddd'}}>
-      <nav style={{display: 'flex', gap: '0.75rem', alignItems: 'center'}}>
-        {!isAuthenticated && <Link to="/login">Login</Link>}
-        {!isAuthenticated && <Link to="/register">Register</Link>}
+    <header className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container">
+        <nav className="navbar-nav d-flex flex-row flex-wrap gap-2">
+          {!isAuthenticated && <Link className="btn btn-outline-light" to="/login">Login</Link>}
+          {!isAuthenticated && <Link className="btn btn-outline-light" to="/register">Register</Link>}
 
-        {isAuthenticated && <Link to="/mis-preguntas">Mis Tests</Link>}
-        {isAuthenticated && <Link to="/tests/historial">Historial</Link>}
-        {isAuthenticated && isAdmin && <Link to="/admin">Admin</Link>}
-        {isAuthenticated && isAdmin && <Link to="/admin/preguntas/upload">Subir CSV</Link>}
-        {isAuthenticated && isAdmin && <Link to="/admin/usuarios">Admin Usuarios</Link>}
-      </nav>
+          {isAuthenticated && <Link className="btn btn-outline-light" to="/mis-preguntas">Mis Tests</Link>}
+          {isAuthenticated && <Link className="btn btn-outline-light" to="/tests/historial">Historial</Link>}
+          {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin">Admin</Link>}
+          {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin/preguntas/upload">Subir CSV</Link>}
+          {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin/usuarios">Admin Usuarios</Link>}
+        </nav>
 
-      <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
-        {!isAuthenticated ? (
-          <Link to="/login"><button>Login</button></Link>
-        ) : (
-          <>
-            <span>Bienvenido {username || 'usuario'}</span>
-            {roles.length > 0 && <small style={{marginLeft: 6}}>({roles.join(', ')})</small>}
-            <button onClick={handleLogout} style={{marginLeft: 8}}>Logout</button>
-          </>
-        )}
+        <div className="d-flex flex-wrap gap-2 align-items-center text-white ms-lg-auto mt-2 mt-lg-0">
+          {!isAuthenticated ? (
+            <Link className="btn btn-outline-light" to="/login">Login</Link>
+          ) : (
+            <>
+              <span>Bienvenido {username || 'usuario'}</span>
+              {roles.length > 0 && <small>({roles.join(', ')})</small>}
+              <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )
