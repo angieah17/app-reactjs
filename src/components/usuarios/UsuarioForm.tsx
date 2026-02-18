@@ -97,57 +97,58 @@ export default function UsuarioForm({
   const shownError = localError || error;
 
   return (
-    <section style={{ border: '1px solid #ddd', padding: '1rem' }}>
-      <h2>{mode === 'create' ? 'Crear usuario' : 'Editar usuario'}</h2>
+    <section className="card p-3">
+      <h2 className="h4">{mode === 'create' ? 'Crear usuario' : 'Editar usuario'}</h2>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '0.75rem', maxWidth: 520 }}>
-        <label htmlFor="username">
-          Username
+      <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">Username</label>
           <input
             id="username"
             type="text"
+            className="form-control"
             value={form.username}
             onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
-            style={{ width: '100%', marginTop: '0.25rem' }}
           />
-        </label>
+        </div>
 
-        <label htmlFor="password">
-          Password {mode === 'edit' ? '(opcional)' : '(requerido)'}
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Password {mode === 'edit' ? '(opcional)' : '(requerido)'}</label>
           <input
             id="password"
             type="password"
+            className="form-control"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            style={{ width: '100%', marginTop: '0.25rem' }}
           />
-        </label>
+        </div>
 
-        <label htmlFor="role">
-          Rol
+        <div className="mb-3">
+          <label htmlFor="role" className="form-label">Rol</label>
           <select
             id="role"
+            className="form-select"
             value={form.role}
             onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as UsuarioRole }))}
-            style={{ width: '100%', marginTop: '0.25rem' }}
           >
             <option value="ADMIN">ADMIN</option>
             <option value="USER">USER</option>
           </select>
-        </label>
+        </div>
 
-        <label htmlFor="enabled" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="mb-3 form-check">
           <input
             id="enabled"
             type="checkbox"
+            className="form-check-input"
             checked={form.enabled}
             onChange={(event) => setForm((current) => ({ ...current, enabled: event.target.checked }))}
           />
-          Habilitado
-        </label>
+          <label htmlFor="enabled" className="form-check-label">Habilitado</label>
+        </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button type="submit" disabled={submitting}>
+        <div className="d-flex gap-2">
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
             {submitting
               ? 'Guardando...'
               : mode === 'create'
@@ -156,14 +157,14 @@ export default function UsuarioForm({
           </button>
 
           {mode === 'edit' && (
-            <button type="button" onClick={onCancelEdit} disabled={submitting}>
+            <button type="button" className="btn btn-secondary" onClick={onCancelEdit} disabled={submitting}>
               Cancelar edición
             </button>
           )}
         </div>
       </form>
 
-      {shownError && <p style={{ color: '#b00020', marginTop: '0.75rem' }}>{shownError}</p>}
+      {shownError && <div className="alert alert-danger mt-3 mb-0">{shownError}</div>}
     </section>
   );
 }

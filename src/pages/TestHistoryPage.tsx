@@ -51,15 +51,15 @@ export default function TestHistoryPage() {
   const isLastPage = totalPages > 0 ? page >= totalPages - 1 : !hasData
 
   return (
-    <section style={{ padding: '1rem', maxWidth: 860 }}>
+    <section className="mx-auto" style={{ maxWidth: 860 }}>
       <h1>Historial de tests</h1>
 
       {loading && <p>Cargando historial...</p>}
 
       {!loading && error && (
-        <div style={{ display: 'grid', gap: '0.5rem', marginBottom: '1rem' }}>
-          <p style={{ color: 'crimson', margin: 0 }}>{error}</p>
-          <button type="button" onClick={() => loadHistory(page)}>
+        <div className="mb-3">
+          <div className="alert alert-danger mb-2">{error}</div>
+          <button type="button" className="btn btn-secondary" onClick={() => loadHistory(page)}>
             Reintentar
           </button>
         </div>
@@ -69,28 +69,29 @@ export default function TestHistoryPage() {
 
       {!loading && !error && hasData && (
         <>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
+          <table className="table table-striped table-hover align-middle mb-3">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Fecha de realización</th>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Puntuación</th>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Temática</th>
+                <th>Fecha de realización</th>
+                <th>Puntuación</th>
+                <th>Temática</th>
               </tr>
             </thead>
             <tbody>
               {records.map((record) => (
                 <tr key={record.id}>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{formatDate(record.fechaRealizacion)}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{Number(record.puntuacion).toFixed(2)}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{record.tematica || 'Sin temática'}</td>
+                  <td>{formatDate(record.fechaRealizacion)}</td>
+                  <td>{Number(record.puntuacion).toFixed(2)}</td>
+                  <td>{record.tematica || 'Sin temática'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="d-flex align-items-center gap-3 flex-wrap">
             <button
               type="button"
+              className="btn btn-secondary"
               onClick={() => loadHistory(page - 1)}
               disabled={loading || isFirstPage}
             >
@@ -104,6 +105,7 @@ export default function TestHistoryPage() {
 
             <button
               type="button"
+              className="btn btn-secondary"
               onClick={() => loadHistory(page + 1)}
               disabled={loading || isLastPage}
             >

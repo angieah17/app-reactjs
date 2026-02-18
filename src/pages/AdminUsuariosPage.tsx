@@ -162,7 +162,7 @@ export default function AdminUsuariosPage() {
 
   if (accessChecking) {
     return (
-      <section style={{ padding: '1rem' }}>
+      <section>
         <h1>Administración de Usuarios</h1>
         <p>Validando permisos...</p>
       </section>
@@ -170,11 +170,11 @@ export default function AdminUsuariosPage() {
   }
 
   return (
-    <section style={{ padding: '1rem' }}>
+    <section>
       <h1>Administración de Usuarios</h1>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <button type="button" onClick={handleCreateMode} disabled={submitting}>
+      <div className="mb-3">
+        <button type="button" className="btn btn-primary" onClick={handleCreateMode} disabled={submitting}>
           Crear usuario
         </button>
       </div>
@@ -188,8 +188,8 @@ export default function AdminUsuariosPage() {
         onCancelEdit={handleCreateMode}
       />
 
-      {feedback && <p style={{ color: '#166534', marginTop: '0.75rem' }}>{feedback}</p>}
-      {tableError && <p style={{ color: '#b00020', marginTop: '0.75rem' }}>{tableError}</p>}
+      {feedback && <div className="alert alert-success mt-3">{feedback}</div>}
+      {tableError && <div className="alert alert-danger mt-3">{tableError}</div>}
 
       <UsuariosTable
         usuarios={usuarios}

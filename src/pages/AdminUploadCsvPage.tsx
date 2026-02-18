@@ -19,6 +19,7 @@ export default function AdminUploadCsvPage() {
       <h1>Subir preguntas CSV</h1>
 
       <form
+        className="mb-3"
         onSubmit={async (event) => {
           event.preventDefault();
           if (!selectedFile) {
@@ -39,27 +40,30 @@ export default function AdminUploadCsvPage() {
           }
         }}
       >
-        <label htmlFor="csv-file">Archivo CSV</label>
-        <input
-          id="csv-file"
-          type="file"
-          accept=".csv,text/csv"
-          onChange={handleFileChange}
-          disabled={isUploading}
-        />
+        <div className="mb-3">
+          <label htmlFor="csv-file" className="form-label">Archivo CSV</label>
+          <input
+            id="csv-file"
+            type="file"
+            className="form-control"
+            accept=".csv,text/csv"
+            onChange={handleFileChange}
+            disabled={isUploading}
+          />
+        </div>
 
-        <button type="submit" disabled={!selectedFile || isUploading}>
+        <button type="submit" className="btn btn-primary" disabled={!selectedFile || isUploading}>
           {isUploading ? 'Subiendo...' : 'Subir'}
         </button>
       </form>
 
-      {successMessage && <p>{successMessage}</p>}
-      {errorMessage && <p>{errorMessage}</p>}
+      {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
       <section>
         <h2>Formato CSV</h2>
         <p>Cabecera obligatoria y separador ;</p>
-        <pre>
+        <pre className="bg-light p-3 border rounded">
 tipo;enunciado;tematica;explicacion;opciones;respuestasCorrectas
 UNICA;Capital de Francia;Geografía;París es la capital;Madrid|París|Roma;1
 MULTIPLE;Números primos;Matemática;Selecciona primos;2|3|4|5;0,1,3

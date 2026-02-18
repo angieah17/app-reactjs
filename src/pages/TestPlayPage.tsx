@@ -106,19 +106,21 @@ export default function TestPlayPage() {
     switch (pregunta.tipoPregunta) {
       case 'VERDADERO_FALSO':
         return (
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-            <label>
+          <div className="d-flex gap-3 mt-2">
+            <label className="form-check-label">
               <input
                 type="radio"
+                className="form-check-input me-1"
                 name={`vf-${pregunta.id}`}
                 checked={isVFAnswer(answer) && answer.respuestaVF === true}
                 onChange={() => setRespuestaVF(pregunta.id, true)}
               />
               Verdadero
             </label>
-            <label>
+            <label className="form-check-label">
               <input
                 type="radio"
+                className="form-check-input me-1"
                 name={`vf-${pregunta.id}`}
                 checked={isVFAnswer(answer) && answer.respuestaVF === false}
                 onChange={() => setRespuestaVF(pregunta.id, false)}
@@ -130,11 +132,12 @@ export default function TestPlayPage() {
 
       case 'UNICA':
         return (
-          <div style={{ display: 'grid', gap: '0.35rem', marginTop: '0.5rem' }}>
+          <div className="d-grid gap-1 mt-2">
             {(pregunta.opciones ?? []).map((opcion, index) => (
-              <label key={`${pregunta.id}-${index}`}>
+              <label key={`${pregunta.id}-${index}`} className="form-check-label">
                 <input
                   type="radio"
+                  className="form-check-input me-1"
                   name={`unica-${pregunta.id}`}
                   checked={isUnicaAnswer(answer) && answer.respuestaUnica === index}
                   onChange={() => setRespuestaUnica(pregunta.id, index)}
@@ -147,11 +150,12 @@ export default function TestPlayPage() {
 
       case 'MULTIPLE':
         return (
-          <div style={{ display: 'grid', gap: '0.35rem', marginTop: '0.5rem' }}>
+          <div className="d-grid gap-1 mt-2">
             {(pregunta.opciones ?? []).map((opcion, index) => (
-              <label key={`${pregunta.id}-${index}`}>
+              <label key={`${pregunta.id}-${index}`} className="form-check-label">
                 <input
                   type="checkbox"
+                  className="form-check-input me-1"
                   checked={isMultipleAnswer(answer) && answer.respuestaMultiple.includes(index)}
                   onChange={() => toggleRespuestaMultiple(pregunta.id, index)}
                 />
@@ -167,14 +171,14 @@ export default function TestPlayPage() {
   }
 
   return (
-    <section style={{ padding: '1rem', maxWidth: 760 }}>
+    <section className="mx-auto" style={{ maxWidth: 760 }}>
       <h1>Jugar test</h1>
-      <p style={{ marginTop: 0 }}>Total preguntas: {testData.totalPreguntas}</p>
+      <p className="mt-0">Total preguntas: {testData.totalPreguntas}</p>
 
       {preguntas.length === 0 ? (
         <p>No hay preguntas para los filtros seleccionados.</p>
       ) : (
-        <ol style={{ display: 'grid', gap: '1rem', paddingLeft: '1.25rem' }}>
+        <ol className="d-grid gap-3 ps-4">
           {preguntas.map((pregunta) => (
             <li key={pregunta.id}>
               <strong>{pregunta.enunciado}</strong>
@@ -184,12 +188,12 @@ export default function TestPlayPage() {
         </ol>
       )}
 
-      <div style={{ marginTop: '1rem', display: 'grid', gap: '0.5rem' }}>
-        <button type="button" onClick={handleSubmit} disabled={submitting || preguntas.length === 0}>
+      <div className="mt-3 d-grid gap-2">
+        <button type="button" className="btn btn-primary" onClick={handleSubmit} disabled={submitting || preguntas.length === 0}>
           {submitting ? 'Enviando...' : 'Enviar respuestas'}
         </button>
 
-        {error && <p style={{ color: 'crimson', margin: 0 }}>{error}</p>}
+        {error && <div className="alert alert-danger mb-0">{error}</div>}
       </div>
     </section>
   )
