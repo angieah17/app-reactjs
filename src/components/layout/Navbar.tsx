@@ -40,6 +40,7 @@ export default function Navbar() {
 
           {isAuthenticated && <Link className="btn btn-outline-light" to="/mis-preguntas">Mis Tests</Link>}
           {isAuthenticated && <Link className="btn btn-outline-light" to="/tests/historial">Historial</Link>}
+          {isAuthenticated && <Link className="btn btn-outline-light" to="/tests/notas">Historial de notas</Link>}
           {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin">Admin</Link>}
           {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin/preguntas/upload">Subir CSV</Link>}
           {isAuthenticated && isAdmin && <Link className="btn btn-outline-light" to="/admin/usuarios">Admin Usuarios</Link>}

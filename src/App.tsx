@@ -7,6 +7,7 @@ import AdminUsuariosPage from './pages/AdminUsuariosPage'
 import AdminUploadCsvPage from './pages/AdminUploadCsvPage'
 import TestGeneratePage from './pages/TestGeneratePage'
 import TestHistoryPage from './pages/TestHistoryPage'
+import TestLogHistoryPage from './pages/TestLogHistoryPage'
 import TestPlayPage from './pages/TestPlayPage'
 import TestResultsPage from './pages/TestResultsPage'
 import WelcomePage from './pages/WelcomePage'
@@ -52,6 +53,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tests/notas"
+            element={
+              <ProtectedRoute>
+                <TestLogHistoryPage />
               </ProtectedRoute>
             }
           />
