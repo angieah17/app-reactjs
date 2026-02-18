@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getBackendErrorMessage } from '../services/apiClient'
+import testLogService from '../services/testLogService'
 import testService, {
   type RespuestaDTO,
   type TestFilters,
@@ -87,6 +88,10 @@ export default function TestPlayPage() {
       const result = await testService.submitTest(respuestas, {
         tematica: filters.tematica,
         tipoPregunta: filters.tipoPregunta as TipoPregunta | undefined,
+      })
+
+      void testLogService.saveTestLog(result.puntuacion).catch((logError) => {
+        console.warn('No se pudo guardar la nota en Mongo', logError)
       })
 
       navigate('/tests/resultados', {
